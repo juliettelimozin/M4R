@@ -10,7 +10,7 @@
 % Edit these to provide the correct information
 % e.g. \newcommand{\reportauthor}{Timothy Kimber}
 
-\newcommand{\reporttitle}{Review of Doubly Robust Estimation methods for incomplete data and simulation studies with different model settings}
+\newcommand{\reporttitle}{Evaluating the Use of Machine Learning for DR Estimation}
 \newcommand{\reportauthor}{Juliette Maiko Limozin}
 \newcommand{\supervisor}{Dr David Whitney}
 \newcommand{\degreetype}{Mathematics}
@@ -156,13 +156,60 @@ and a few tools
 
 \cite{diaz}
 
-Parametrix models are have more certainty but mostly produce biased estimate, but can apply CLA and law of large numbers for convenient asymptotic normality and confidence itnervals.
+Parametric models are more certainty but mostly produce biased estimate, but we can apply the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
 
-But convenience is over weighed by dfectiveness under model misspecification as we mentionned in the previous section, so probability of CI contianing the true value converges to 0. Can use machine learning models to alliviate this bias.
+But convenience is over weighed by defectiveness under model misspecification as we mentionned in the previous section, so the probability of the CI containing the true mean converges to 0. 
+
+Let us look at an example to illustrate this defectiveness. We take the model specification from this 2017 paper by D. Benkeser \cite{benkeser2017}: our co-variate vector is $W = (W_1, W_2)$, where $W_1$ is uniformly distributed over $[-2,2]$ and $W_2$ has a Bernoulli distribution of success probability $1/2$. $W_1$ and $W_2$ are independent. The true propensity score is 
+\begin{align*}
+    \pi(W) = P(A = 1 |W = (w_1,w_2)) = expit(-w_1 + 2w_1w_2)
+\end{align*}
+
+The partially observed outcome has a conditional probability of occurrence 
+\begin{align*}
+    P(Y = 1|A = a,W = (w_1, w_2)) = expit(0.2a - w_1 + 2w_1w_2)
+\end{align*}
+
+The true outcome model $m(W)$ is then 
+\begin{align*}
+    E(Y|W) &= P(Y = 1|W) \\
+    & = P(Y = 1 |W, A = 1)P(A = 1|W) +  P(Y = 1 |W, A = 0)P(A = 0|W) \\
+    & = expit(0.2 - w_1 + 2w_1w_2)expit(-w_1+2w_1w_2) + \\
+    & \phantom{={}} expit(-w_1+2w_1w_2)(1-expit(-w_1 + 2w_1w_2)) \\
+    & = expit(-w_1 + 2w_1w_2)(expit(0.2 - w_1 + 2w_1w_2) + 1 - expit(-w_1 + 2w_1w_2))
+\end{align*}
+
+From there we calculated four parametric DR estimates: 
+\begin{itemize}
+    \item \texttt{DR\_parametric}, where the propensity and outcome models are estimated by logistic and linear regression
+    \item \texttt{DR\_true}, where both models are correctly specified using the formulas above;
+    \item \texttt{DR\_wrong\_om}, where the outcome model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ ;
+    \item \texttt{DR\_wrong\_ps}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$.
+\end{itemize}
+
+For each estimates we considered sample sizes $N= 250,500,750,1000,2000,3000,4000,5000,6000,7000,8000$ and for each N we calculated the bias of the estimators over 5000 generated datasets.
+
+
+
+
+
+
+
+
+Can use machine learning models to alleviate this bias.
 
 TMLE and DML are asymptotically normal and efficient under consistency assumptions on the nuisance estimators
 
-Data adaptative methods: random forests, kernel regression, outcome weighed learning, Q-learning, ensemble learners. These methods may not have quantifyable theoretical guarantees though.
+Data adaptive methods: random forests, kernel regression, outcome weighed learning, Q-learning, ensemble learners. These methods may not have quantifyable theoretical guarantees though.
+
+Double/Debiased Machine Learning for Treatment
+and Structural Parameters
+Victor Chernozhukov
+
+
+
+
+
 
 %% bibliography
 
