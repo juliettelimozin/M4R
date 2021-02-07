@@ -14,7 +14,7 @@
 \newcommand{\reportauthor}{Juliette Maiko Limozin}
 \newcommand{\supervisor}{Dr David Whitney}
 \newcommand{\degreetype}{Mathematics}
-
+\newcommand{\expit}{\text{expit}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % load some definitions and default packages
@@ -130,7 +130,7 @@ However this motivates the idea behind the augmented IPW estimator. From Davidia
 
 This is called an augmented IPW as it is the sum of the IPW estimator and an augmentation term depending on $h(\mathbf{W})$ \cite{davidian}. By taking $-h(\mathbf{W}) = m(\mathbf{W}, \hat{\gamma})$, we have a new estimator
 \begin{equation}
-    \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} - \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
+    \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
 $\hat\beta_{DR}$ is consistent and asymptotically normal when either the propensity or outcome model are correctly specified, as the correct specification of one suffices for the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire distribution whilst maintaining a better efficiency than IPW estimators \cite{vansteelandt}.
@@ -151,32 +151,24 @@ Another issue with the standard DR estimator is that $\hat\beta_{DR}$ may be out
 
 \section{Machine Learning approaches to optimise the DR estimator}
 
-evolve in the literature since 2007
-and a few tools
-
-\cite{diaz}
-
 Parametric models are more certainty but mostly produce biased estimate, but we can apply the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
 
-But convenience is over weighed by defectiveness under model misspecification as we mentionned in the previous section, so the probability of the CI containing the true mean converges to 0. 
+But convenience is over weighed by defectiveness under model misspecification as we mentionned in the previous section, so the probability of the CI containing the true mean converges to 0. \cite{diaz}
 
 Let us look at an example to illustrate this defectiveness. We take the model specification from this 2017 paper by D. Benkeser \cite{benkeser2017}: our co-variate vector is $W = (W_1, W_2)$, where $W_1$ is uniformly distributed over $[-2,2]$ and $W_2$ has a Bernoulli distribution of success probability $1/2$. $W_1$ and $W_2$ are independent. The true propensity score is 
 \begin{align*}
-    \pi(W) = P(A = 1 |W = (w_1,w_2)) = expit(-w_1 + 2w_1w_2)
+    \pi(W) = P(A = 1 |W = (w_1,w_2)) = \expit(-w_1 + 2w_1w_2)
 \end{align*}
 
 The partially observed outcome has a conditional probability of occurrence 
 \begin{align*}
-    P(Y = 1|A = a,W = (w_1, w_2)) = expit(0.2a - w_1 + 2w_1w_2)
+    P(Y = 1|A = a,W = (w_1, w_2)) = \expit(0.2a - w_1 + 2w_1w_2)
 \end{align*}
 
 The true outcome model $m(W)$ is then 
 \begin{align*}
-    E(Y|W) &= P(Y = 1|W) \\
-    & = P(Y = 1 |W, A = 1)P(A = 1|W) +  P(Y = 1 |W, A = 0)P(A = 0|W) \\
-    & = expit(0.2 - w_1 + 2w_1w_2)expit(-w_1+2w_1w_2) + \\
-    & \phantom{={}} expit(-w_1+2w_1w_2)(1-expit(-w_1 + 2w_1w_2)) \\
-    & = expit(-w_1 + 2w_1w_2)(expit(0.2 - w_1 + 2w_1w_2) + 1 - expit(-w_1 + 2w_1w_2))
+    E(Y|W, A =1) &= P(Y = 1|W, A= 1) \\
+    & = \expit(0.2 - w_1 + 2w_1w_2)
 \end{align*}
 
 From there we calculated four parametric DR estimates: 
@@ -187,9 +179,18 @@ From there we calculated four parametric DR estimates:
     \item \texttt{DR\_wrong\_ps}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$.
 \end{itemize}
 
-For each estimates we considered sample sizes $N= 250,500,750,1000,2000,3000,4000,5000,6000,7000,8000$ and for each N we calculated the bias of the estimators over 5000 generated datasets.
+For each estimates we considered sample sizes $N = 250, 500, 750, 1000, 2000, $ $3000, 4000, 5000, 6000, 7000, 8000$ and for each N we calculated the bias of the estimators over 5000 generated datasets.
 
-
+To calculate the bias we must have the expectation of $Y$; we do so by getting the marginal distribution:
+\begin{align*}
+    E(Y|A = 1) &= P(Y = 1|A = 1)\\
+    &= \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1, W_1 = w_1, W_2 = w_2|A = 1) dw_1 \\
+    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1|W_1 = w_1, W_2 = w_2, A = 1)P(A = 1, W_1 = w_1, W_2 = w_2)dw_1 \\
+    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} \expit(0.2 - w_1 + 2w_1w_2)P(A = 1|W_1 = w_1, W_2 = w_2)P(W_1 = w_1)P( W_2 = w_2)dw_1 \\
+    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} \expit(0.2 - w_1 + 2w_1w_2)\expit(-w_1+2w_1w_2) \cdot \frac{1}{4}\cdot \frac{1}{2}dw_1 \\
+    & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1)\expit(-w_1) +\expit(0.2 - w_1 + 2w_1)\expit(w_1)]dw_1 \\
+    & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1) +\expit(0.2 + w_1)]dw_1 \\
+\end{align*}
 
 
 
@@ -212,7 +213,7 @@ Victor Chernozhukov
 
 
 %% bibliography
-
+\clearpage
 \bibliographystyle{unsrt}
 \bibliography{bibliography}
 
