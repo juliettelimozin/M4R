@@ -61,7 +61,7 @@ N = list(i*200 for i in range(1,11))
 
 estimates = np.zeros((4,2500,len(N)))
 CI = np.zeros((4,2500,len(N)))
-
+SEs = np.zeros((4,2500,len(N)))
 for i in range(2500): 
     for j in range(len(N)):
         W1 = np.random.uniform(-2,2,N[j])
@@ -79,6 +79,10 @@ for i in range(2500):
         estimates[1,i,j] = DR_r
         estimates[2,i,j] = DR_om
         estimates[3,i,j] = DR_ps
+        SEs[0,i,j] = se_para
+        SEs[1,i,j] = se_r
+        SEs[2,i,j] = se_om
+        SEs[3,i,j] = se_ps
         
         tval = 1.96
         
@@ -104,37 +108,31 @@ for i in range(2500):
        
 np.save('estimates.npy',estimates)
 np.save('CI.npy', CI)
+np.save('SEs.npy', SEs)
 
 estimates = np.load('estimates.npy')
-
+CI = np.load('CI.npy')
+SEs = np.load ('SEs.npy')
+          
 bias_para = np.mean(estimates[0,:,:], axis = 0) - B_true*np.ones(len(N))
 bias_right = np.mean(estimates[1,:,:], axis = 0) - B_true*np.ones(len(N))
 bias_wrong_om = np.mean(estimates[2,:,:], axis = 0) - B_true*np.ones(len(N))
 bias_wrong_ps = np.mean(estimates[3,:,:], axis = 0) - B_true*np.ones(len(N))
 
+B_true_Mat = B_true*np.ones((2500,len(N)))
+sd_para = np.sqrt(np.sum(np.square(estimates[0,:,:]-B_true_Mat), axis = 0)/2400)
+sd_r = np.sqrt(np.sum(np.square(estimates[1,:,:]-B_true_Mat), axis = 0)/2400)
+sd_wrong_om = np.sqrt(np.sum(np.square(estimates[2,:,:]-B_true_Mat), axis = 0)/2400)
+sd_wrong_ps = np.sqrt(np.sum(np.square(estimates[3,:,:]-B_true_Mat), axis = 0)/2400)
 
-plt.figure()
-plt.plot(N, bias_para, label = 'DRE logistic')
-plt.title('Bias of DR with logistic regressions')
-plt.show()
+ratio_para = sd_para/np.mean(SEs[0,:,:], axis = 0)
+ratio_r = sd_r/np.mean(SEs[1,:,:], axis = 0)
+ratio_wrong_om = sd_wrong_om/np.mean(SEs[2,:,:], axis = 0)
+ratio_wrong_ps = sd_wrong_ps/np.mean(SEs[3,:,:], axis = 0)
 
-plt.figure()
-plt.plot(N,bias_right, label = 'DR right models')
-plt.title('Bias of DR correct specification')
-plt.show()
 
-plt.figure()
-plt.plot(N, bias_wrong_om, label = 'DR wrong outcome model')
-plt.title('Bias of DR with wrong outcome model')
-plt.show()
-
-plt.figure()
-plt.plot(N,bias_wrong_ps, label =  'DR wrong propensity score')
-plt.title('Bias of DR with wrong propensity score')
-plt.show()
-
-plt.figure()
-plt.plot(N, bias_para, label = 'DRE logistic')
+plt.figure(figsize = (10,6.6))
+plt.plot(N, bias_para, label = 'DR logistic')
 plt.plot(N,bias_right, label = 'DR right models')
 plt.plot(N, bias_wrong_om, label = 'DR wrong outcome model')
 plt.plot(N,bias_wrong_ps, label =  'DR wrong propensity score')
@@ -144,12 +142,7 @@ plt.ylabel('Bias')
 plt.title('Emperial bias convergence of various DR estimators')
 plt.show()
 
-plt.hist(estimates[0,:,-1], bins = 200)
-plt.vlines(B_true, 0, 100)
-plt.hist(estimates[1,:,-1], bins = 200)
-
-
-plt.figure()
+plt.figure(figsize = (10,6.6))
 plt.title('Coverage of 95% confidence intervals')
 plt.plot(N,np.mean(CI[0,:,:], axis = 0), label = 'DR logistic')
 plt.plot(N,np.mean(CI[1,:,:], axis = 0), label = 'DR right')
@@ -159,3 +152,15 @@ plt.hlines(0.95, 200, 2000, linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size')
 plt.legend()
 plt.show()
+
+plt.figure(figsize = (10,6.6))
+plt.plot(N, ratio_para, label = 'DR logistic')
+plt.plot(N, ratio_r, label = 'DR right')
+plt.plot(N, ratio_wrong_om, label = 'DR wrong outcome model')
+plt.plot(N, ratio_wrong_ps, label = 'DR wrong propensity score')
+plt.legend()
+plt.xlabel('Sample size')
+plt.ylabel('SD(estimates of mean)/mean(estimates of standard error)')
+plt.title('Ratio of standard deviation to mean standard error estimates')
+plt.show()
+
