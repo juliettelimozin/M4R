@@ -3,7 +3,6 @@
 \usepackage[nottoc]{tocbibind}
 \usepackage{fancyhdr,ragged2e}
 \fancyhead{}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Definitions for the title page
@@ -61,7 +60,7 @@ Comment this out if not needed.
 \setcounter{page}{1}
 \fancyhead[L]{\textsl{\leftmark}}
 
-
+\setcitestyle{authoryear,open={(},close={)}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction} 
 
@@ -70,7 +69,7 @@ Comment this out if not needed.
 
 \subsection{Definitions} 
 
-Suppose we have a data set of size $n$, and realisations of random vector $(\mathbf{Y}, \mathbf{W}, \mathbf{R})$ where $\mathbf{Y}$ denotes a partially denotes outcome, i.e. $Y_i$ is missing for individual $i$'s unobserved outcome. $\mathbf{W}$ denotes the auxiliary variables, and \mathbf{R} is an indicator on whether the $i$th individual's outcome is missing or not; that is, if $R_i = 1$, the outcome is observed, whereas $R_i = 0$ would indicate that the outcome is missing.
+Suppose we have a data set of size $n$, and realisations of random vector $(\mathbf{Y}, \mathbf{W}, \mathbf{R})$ where $\mathbf{Y}$ denotes a partially denotes outcome, i.e. $Y_i$ is missing for individual $i$'s unobserved outcome. $\mathbf{W}$ denotes the auxiliary variables, and $\mathbf{R}$ is an indicator on whether the $i$th individual's outcome is missing or not; that is, if $R_i = 1$, the outcome is observed, whereas $R_i = 0$ would indicate that the outcome is missing.
 To summarise:
 \begin{itemize}
     \item $\mathbf{Y}$: partially observed outcome 
@@ -78,17 +77,17 @@ To summarise:
     \item $\mathbf{R}$: indicator on whether $Y$ is observed or not ($R = 1$: observed, $R = 0$: missing) 
 \end{itemize}
 
-A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \cite{vansteelandt}.
+A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}.
 
 When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}.\\
 
-We make the assumption that $(W_1, Y_1, R_1),...,(W_n, Y_n, R_n)$ are independent and identically distributed. We also assume that $R$ is independent of $Y$ given W so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR \cite{vansteelandt}, where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
+We make the assumption that $(W_1, Y_1, R_1),...,(W_n, Y_n, R_n)$ are independent and identically distributed. We also assume that $R$ is independent of $Y$ given W so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR (\citeauthor{vansteelandt}), where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
 
 \subsection{Inverse Probability Weighting approach}
 
 A problem occurs when trying to compute the expectation of the outcome $\beta = E(\mathbf{Y})$ as it is only partially observed, so calculating a mean with the observed outcomes would not be a good representation of the data outcome as a whole.
 
-One solution to this problem is the Inverse Probability Weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the probability that the $i$th individual is observed given the set of variables for this outcome, $\mathbf{W}_i$ \cite{vansteelandt}. We denote this weight by
+One solution to this problem is the Inverse Probability Weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the probability that the $i$th individual is observed given the set of variables for this outcome, $\mathbf{W}_i$ (\citeauthor{vansteelandt}). We denote this weight by
 \begin{align*}
     \pi(\mathbf{W})^{-1} = \frac{1}{P(R = 1|\mathbf{W})}.
 \end{align*}
@@ -100,19 +99,19 @@ The IPW estimator of the mean $\beta$ is then simply
     \hat{\beta}_{IPW} = \frac{1}{n} \sum_{i=1}^{n} \frac{R_iY_i}{\pi(\mathbf{W}_i)}.
 \end{equation}
 
-As $\pi(\mathbf{W})$ is unknown as the data is missing at random, we propose a propensity model, most commonly a parametric model $\pi(\mathbf{W}; \boldsymbol\alpha)$ for the missingness pattern and we build and estimator $\hat{\boldsymbol\alpha}$ of $\boldsymbol\alpha$ from the data \cite{vansteelandt}.
+As $\pi(\mathbf{W})$ is unknown as the data is missing at random, we propose a propensity model, most commonly a parametric model $\pi(\mathbf{W}; \boldsymbol\alpha)$ for the missingness pattern and we build and estimator $\hat{\boldsymbol\alpha}$ of $\boldsymbol\alpha$ from the data (\citeauthor{vansteelandt}).
 
-The IPW estimator is consistent for $\beta$ if the propensity model $\pi(\mathbf{W}; \boldsymbol\alpha)$ is correctly specified \cite{davidian}. 
+The IPW estimator is consistent for $\beta$ if the propensity model $\pi(\mathbf{W}; \boldsymbol\alpha)$ is correctly specified \citep{davidian}. 
 
 If the propensity model $\pi(\mathbf{W})$ is correctly specified, then by the law of large numbers, $\hat{\beta}_{IPW}$ will converge almost surely to the true mean $\beta$, so the Central Limit Theorem (CLT) holds, giving $\sqrt{n}(\hat{\beta}_{IPW}-\beta) \xrightarrow{d} N(0,\sigma_1^2)$ where $\sigma$ is the estimated outcome variance, so this makes the IPW estimate consistent for $\beta$. We can then use CLT to perform inference tests and confidence intervals for the true mean.
 
-A quick drawback from the IPW estimator in \ref{IPW_est} is it is usually difficult to construct at propensity model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size n is large enough, so a removal of bias is not guaranteed by the IPW estimator when he model is misspecified. Another problem that arises is unstable weights: if the model is misspecified, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a select few, so the IPW estimator is mainly dominated by these large weights \cite{seaman}.
+A quick drawback from the IPW estimator in \ref{IPW_est} is it is usually difficult to construct at propensity model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size n is large enough, so a removal of bias is not guaranteed by the IPW estimator when he model is misspecified. Another problem that arises is unstable weights: if the model is misspecified, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a select few, so the IPW estimator is mainly dominated by these large weights \citep{seaman}.
 
-Kang and Schafer \cite{kang} suggest that the model being misspecified is more likely the cause of large weights, rather than if the auxiliary variables are truly predictive of whether the outcome may be missing or not. There exist a few tests, including the Hosmer–Lemeshow \cite{hosmer} test, to detect poor fit of the propensity model.\\
+\citeauthor{kang} suggest that the model being misspecified is more likely the cause of large weights, rather than if the auxiliary variables are truly predictive of whether the outcome may be missing or not. There exist a few tests, including the \citet{hosmer} test, to detect poor fit of the propensity model.\\
 
 \subsection{Regression imputation approach} 
 
-Alternatively, one could make use of the expectation of the outcome $Y$ given $W$, $E(Y|\mathbf{W})$, which we denote as $m(\mathbf{W})$, to have a different estimator of the mean \cite{davidian,vansteelandt}, sometimes called the regression imputation estimator: 
+Alternatively, one could make use of the expectation of the outcome $Y$ given $W$, $E(Y|\mathbf{W})$, which we denote as $m(\mathbf{W})$, to have a different estimator of the mean \citep{davidian,vansteelandt}, sometimes called the regression imputation estimator: 
 
 \begin{equation}
     \hat{\beta}_ {RI} = \frac{1}{n}\sum_{i = 1}^n m(\mathbf{W}_i)
@@ -122,7 +121,7 @@ Because again the true value of $m(\mathbf{W})$ is unknown, we propose an outcom
 
 \subsection{Augmented IPW approach} 
 
-However this motivates the idea behind the augmented IPW estimator. From Davidian et al. \cite{davidian}, estimators of $\beta$, when the propensity model is correctly specified and the estimators are consistent and are asymptotically normal(i.e. CLT holds), are equivalent to 
+However this motivates the idea behind the augmented IPW estimator. From \citet{davidian}, estimators of $\beta$, when the propensity model is correctly specified and the estimators are consistent and are asymptotically normal(i.e. CLT holds), are equivalent to 
 
 \begin{equation}
     \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} - \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) h(\mathbf{W}_i)
@@ -133,64 +132,85 @@ This is called an augmented IPW as it is the sum of the IPW estimator and an aug
     \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
-$\hat\beta_{DR}$ is consistent and asymptotically normal when either the propensity or outcome model are correctly specified, as the correct specification of one suffices for the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire distribution whilst maintaining a better efficiency than IPW estimators \cite{vansteelandt}.
+$\hat\beta_{DR}$ is consistent and asymptotically normal when either the propensity or outcome model are correctly specified, as the correct specification of one suffices for the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire distribution whilst maintaining a better efficiency than IPW estimators (\citeauthor{vansteelandt}).
 
 For example, doubly-robust estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations to compute a DR estimation of the mean. \\
 
 \subsection{Parametric DR estimator}
 
-In standard parametric DR estimation, we define the propensity and outcome models as logistic and linear regression models. The formula for the propensity model is:
-\begin{equation*}
-    \pi(W,\alpha) = \frac{1}{1+exp((1,W)^T\alpha)} 
-\end{equation*}
-We let the estimators $\hat{\alpha}$ and $\hat\gamma$ of $\alpha$ and $\gamma$ respectively, taken from the data $(\mathbf{W}_1, Y_1, R_1),$ $...,(\mathbf{W}_n, Y_n, R_n)$, to be the Maximum Likelihood estimators. \\
+In standard parametric DR estimation, it is fairly common to define the propensity and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages.\\
 
-Although this version of the DR estimator that these models lead to has been established as the usual estimator, Kang and Schafer \cite{kang} have shown it performs poorly when either the propensity or both models are misspecified, i.e when logistic and linear regressions aren't the judicious choice of models for the data. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
+Although this version of the DR estimator that these models lead to has been established as the usual estimator, \citeauthor{kang} have shown it performs poorly when either the propensity or both models are misspecified, i.e when logistic and linear regressions aren't the judicious choice of models for the data. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
 
-Another issue with the standard DR estimator is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome \cite{vansteelandt}.
+Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome (\citeauthor{vansteelandt}).
 
-\section{Machine Learning approaches to optimise the DR estimator}
+\subsubsection{Simulation study of parametric DR}
 
-Parametric models are more certainty but mostly produce biased estimate, but we can apply the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
-
-But convenience is over weighed by defectiveness under model misspecification as we mentionned in the previous section, so the probability of the CI containing the true mean converges to 0. \cite{diaz}
-
-Let us look at an example to illustrate this defectiveness. We take the model specification from this 2017 paper by D. Benkeser \cite{benkeser2017}: our co-variate vector is $W = (W_1, W_2)$, where $W_1$ is uniformly distributed over $[-2,2]$ and $W_2$ has a Bernoulli distribution of success probability $1/2$. $W_1$ and $W_2$ are independent. The true propensity score is 
+Let us look at an example to illustrate the use of parametric DR estimators. We take the model specification from \citet{benkeser2017}: our co-variate vector is $\mathbf{W} = (W_1, W_2)$, where $W_1$ is uniformly distributed over $[-2,2]$ and $W_2$ has a Bernoulli distribution of success probability $1/2$. $W_1$ and $W_2$ are independent. The missingness indicator $R$ is a Bernoulli random variable of success probability $\expit(-w_1 + 2w_1w_2)$. The true propensity score is therefore
 \begin{align*}
-    \pi(W) = P(A = 1 |W = (w_1,w_2)) = \expit(-w_1 + 2w_1w_2)
+    \pi(\mathbf{W}) = P(R = 1 |\mathbf{W} = (w_1,w_2)) = \expit(-w_1 + 2w_1w_2)
 \end{align*}
 
 The partially observed outcome has a conditional probability of occurrence 
 \begin{align*}
-    P(Y = 1|A = a,W = (w_1, w_2)) = \expit(0.2a - w_1 + 2w_1w_2)
+    P(Y = 1|R = r,\mathbf{W} = (w_1, w_2)) = \expit(0.2r - w_1 + 2w_1w_2)
 \end{align*}
 
 The true outcome model $m(W)$ is then 
 \begin{align*}
-    E(Y|W, A =1) &= P(Y = 1|W, A= 1) \\
+    E(Y|\mathbf{W}, R=1) &= P(Y = 1|\mathbf{W}, R= 1) \\
     & = \expit(0.2 - w_1 + 2w_1w_2)
 \end{align*}
 
 From there we calculated four parametric DR estimates: 
 \begin{itemize}
-    \item \texttt{DR\_parametric}, where the propensity and outcome models are estimated by logistic and linear regression
-    \item \texttt{DR\_true}, where both models are correctly specified using the formulas above;
-    \item \texttt{DR\_wrong\_om}, where the outcome model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ ;
-    \item \texttt{DR\_wrong\_ps}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$.
+    \item \texttt{DR logistic}, where the propensity and outcome models are estimated by logistic regression fits that account for the interaction term between $W_1, W_2$;
+    \item \texttt{DR right}, where both models are correctly specified using the formulas above;
+    \item \texttt{DR wrong outcome model}, where the outcome model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in a logistic regression fit
+    \item \texttt{DR wrong propensity score}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in a logistic regression fit.
 \end{itemize}
 
-For each estimates we considered sample sizes $N = 250, 500, 750, 1000, 2000, $ $3000, 4000, 5000, 6000, 7000, 8000$ and for each N we calculated the bias of the estimators over 5000 generated datasets.
+For each estimates we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the coverage of the 95\% confidence intervals and accuracy of the standard error estimation from \citet{lunceford_davidian}.
 
-To calculate the bias we must have the expectation of $Y$; we do so by getting the marginal distribution:
+To calculate the bias we must have the true expectation of $Y$, which is equal to taking the expectation of $Y$ given $A = 1$:
 \begin{align*}
-    E(Y|A = 1) &= P(Y = 1|A = 1)\\
-    &= \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1, W_1 = w_1, W_2 = w_2|A = 1) dw_1 \\
-    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1|W_1 = w_1, W_2 = w_2, A = 1)P(A = 1, W_1 = w_1, W_2 = w_2)dw_1 \\
-    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} \expit(0.2 - w_1 + 2w_1w_2)P(A = 1|W_1 = w_1, W_2 = w_2)P(W_1 = w_1)P( W_2 = w_2)dw_1 \\
+    E(Y|A = 1) &= P(Y = 1|R = 1)\\
+    &= \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1, W_1 = w_1, W_2 = w_2|R = 1) dw_1 \\
+    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1|W_1 = w_1, W_2 = w_2, R = 1) \\
+    & \phantom{ = \int_{-2}^{2} \sum_{w_2 = 0}^{1}} \cdot P(R = 1, W_1 = w_1, W_2 = w_2)dw_1 \\
+    & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} \expit(0.2 - w_1 + 2w_1w_2)P(R = 1|W_1 = w_1, W_2 = w_2) \\
+    &\phantom{ = \int_{-2}^{2} \sum_{w_2 = 0}^{1}} \cdot P(W_1 = w_1)P(W_2 = w_2)dw_1 \\
     & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} \expit(0.2 - w_1 + 2w_1w_2)\expit(-w_1+2w_1w_2) \cdot \frac{1}{4}\cdot \frac{1}{2}dw_1 \\
-    & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1)\expit(-w_1) +\expit(0.2 - w_1 + 2w_1)\expit(w_1)]dw_1 \\
-    & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1) +\expit(0.2 + w_1)]dw_1 \\
+    & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1)\expit(-w_1) \\
+    &\phantom{ = \int_{-2}^{2} \sum_{w_2 = 0}^{1}} +\expit(0.2 - w_1 + 2w_1)\expit(-w_1+2w_1)]dw_1 \\
+    & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1)\expit(-w_1) +\expit(0.2 + w_1)\expit(w_1)]dw_1 \\
 \end{align*}
+
+By calculating the above integral numerically, we get that the true mean, had all outcome variables $Y_i$ been accounted for, is about 0.53.
+
+For calculating the confidence intervals, we set the model-based sample error estimate to be 
+\begin{align*}
+    \hat{SE} = n^{-1} \sqrt{\sum_{i=1}^n \left(\frac{R_i(Y_i - m(\mathbf{W}_i))}{\pi(\mathbf{W}_i)} + m(\mathbf{W}_i) - \hat{\beta}_{DR}\right)^2}
+\end{align*}
+from \citet{lunceford_davidian}. An issue with this estimate of the standard error is that it is specifically for DR estimates with correctly specified nuisance parameters; we will cover the issue with one incorrectly specified nuisance parameter later.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/biaspara.png}
+    \caption{Simulation results of bias for the various DR estimator specifications}
+    \label{figbiaspara}
+\end{figure}
+
+
+\section{Machine Learning approaches to optimise the DR estimator}
+
+
+Parametric models are more certainty but mostly produce biased estimate, but we can apply the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
+
+But convenience is over weighed by defectiveness under model misspecification as we mentioned in the previous section, so the probability of the CI containing the true mean converges to 0 \citep{diaz}
+
+
+
 
 
 
@@ -214,7 +234,7 @@ Victor Chernozhukov
 
 %% bibliography
 \clearpage
-\bibliographystyle{unsrt}
+\bibliographystyle{unsrtnat}
 \bibliography{bibliography}
 
 
