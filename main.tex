@@ -46,7 +46,11 @@ Your abstract.cddvfvfbb
 \cleardoublepage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Acknowledgments}
-Comment this out if not needed.
+I would like to thank my project supervisor, Dr David Whitney, for his continued guidance and support throughout this project. Our weekly meetings have always been a pleasure, and his advice on postgraduate studies have also been of immense help. 
+
+I would also like to thank my family, who even though might not understand Statistics at a Master's level, have always enabled me to achieve my best.
+
+Last but not least, I would like to thank my various statistics lecturers who, in my 4 years at Imperial, have infected me with their passion for Statistics.
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 
@@ -64,12 +68,17 @@ Comment this out if not needed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction} 
 
+- Clinical trials often have reserve patients because the trial patients might drop out for x and y reason
 
-\section{Inverse probability weighting and doubly robust estimators}
+- often the calculation of the mean outcome of the trial is needed, but what do we do with the patients we don't have an outcome for?
 
-\subsection{Definitions} 
+- in this report we will cover the Doubly-Robust mean estimation method combined with machine learning tools that will help generate a consistent estimation of the mean thanks to easy to use computational tools
 
-Suppose we have a data set of size $n$, and realisations of random vector $(\mathbf{Y}, \mathbf{W}, \mathbf{R})$ where $\mathbf{Y}$ denotes a partially denotes outcome, i.e. $Y_i$ is missing for individual $i$'s unobserved outcome. $\mathbf{W}$ denotes the auxiliary variables, and $\mathbf{R}$ is an indicator on whether the $i$th individual's outcome is missing or not; that is, if $R_i = 1$, the outcome is observed, whereas $R_i = 0$ would indicate that the outcome is missing.
+- Hopefully this report can be useful to upcoming clinical trials in making them understand how the machine learning models can be use to improve mean estimation from missing data
+
+\section{Setting} 
+
+Suppose we have a data set of size $n$, and realisations of random vector $(\mathbf{Y}, \mathbf{W}, \mathbf{R})$ where $\mathbf{Y}$ denotes a partially denoted outcome, i.e. $Y_i$ is missing for individual $i$'s unobserved outcome. $\mathbf{W}$ denotes the auxiliary variables, and $\mathbf{R}$ is an indicator on whether the $i$th individual's outcome is missing or not; that is, if $R_i = 1$, the outcome is observed, whereas $R_i = 0$ would indicate that the outcome is missing.
 To summarise:
 \begin{itemize}
     \item $\mathbf{Y}$: partially observed outcome 
@@ -77,15 +86,17 @@ To summarise:
     \item $\mathbf{R}$: indicator on whether $Y$ is observed or not ($R = 1$: observed, $R = 0$: missing) 
 \end{itemize}
 
-A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}.
+A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}. So in the example of a clinical trial, we would consider the outcome to be missing at random if it is independent of the reason for the patients' drop out. The MAR setting will therefore have effects on any causal inference we may perform on this data set.
 
 When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}.\\
 
-We make the assumption that $(W_1, Y_1, R_1),...,(W_n, Y_n, R_n)$ are independent and identically distributed. We also assume that $R$ is independent of $Y$ given W so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR (\citeauthor{vansteelandt}), where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
+We make the assumption that $(W_1, Y_1, R_1),...,(W_n, Y_n, R_n)$ are independent and identically distributed for the rest of the report. We also assume that $R$ is independent of $Y$ given W so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR (\citeauthor{vansteelandt}), where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
+
+\section{Inverse probability weighting and doubly robust estimators}
 
 \subsection{Inverse Probability Weighting approach}
 
-A problem occurs when trying to compute the expectation of the outcome $\beta = E(\mathbf{Y})$ as it is only partially observed, so calculating a mean with the observed outcomes would not be a good representation of the data outcome as a whole.
+Suppose we wish to calculate or estimate the outcome mean $\beta = E(\mathbf{Y})$. A problem occurs when trying to compute it as $\mathbg{Y}$ is only partially observed, so calculating a mean with only the observed outcomes would not be a good representation of the data outcome as a whole.
 
 One solution to this problem is the Inverse Probability Weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the probability that the $i$th individual is observed given the set of variables for this outcome, $\mathbf{W}_i$ (\citeauthor{vansteelandt}). We denote this weight by
 \begin{align*}
@@ -132,7 +143,7 @@ This is called an augmented IPW as it is the sum of the IPW estimator and an aug
     \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
-$\hat\beta_{DR}$ is consistent and asymptotically normal when either the propensity or outcome model are correctly specified, as the correct specification of one suffices for the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire distribution whilst maintaining a better efficiency than IPW estimators (\citeauthor{vansteelandt}).
+$\hat\beta_{DR}$ is consistent and asymptotically normal when either the propensity or outcome model are correctly specified, as the correct specification of one suffices for the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire distribution whilst maintaining a better efficiency than IPW estimators \citep{vansteelandt}.
 
 For example, doubly-robust estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations to compute a DR estimation of the mean. \\
 
@@ -144,7 +155,7 @@ Although this version of the DR estimator that these models lead to has been est
 
 Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome (\citeauthor{vansteelandt}).
 
-\subsubsection{Simulation study of parametric DR}
+\subsection{Simulation study of parametric DR}
 
 Let us look at an example to illustrate the use of parametric DR estimators. We take the model specification from \citet{benkeser2017}: our co-variate vector is $\mathbf{W} = (W_1, W_2)$, where $W_1$ is uniformly distributed over $[-2,2]$ and $W_2$ has a Bernoulli distribution of success probability $1/2$. $W_1$ and $W_2$ are independent. The missingness indicator $R$ is a Bernoulli random variable of success probability $\expit(-w_1 + 2w_1w_2)$. The true propensity score is therefore
 \begin{align*}
@@ -164,17 +175,17 @@ The true outcome model $m(W)$ is then
 
 From there we calculated four parametric DR estimates: 
 \begin{itemize}
-    \item \texttt{DR logistic}, where the propensity and outcome models are estimated by logistic regression fits that account for the interaction term between $W_1, W_2$;
-    \item \texttt{DR right}, where both models are correctly specified using the formulas above;
-    \item \texttt{DR wrong outcome model}, where the outcome model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in a logistic regression fit
-    \item \texttt{DR wrong propensity score}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in a logistic regression fit.
+    \item \texttt{DR logistic}, where the propensity and outcome models are correctly specified by logistic regression fits that account for the interaction term between $W_1, W_2$;
+    \item \texttt{DR right}, where both models are correctly specified using the exact formulas above;
+    \item \texttt{DR wrong outcome model}, where the outcome model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit;
+    \item \texttt{DR wrong propensity score}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit.
 \end{itemize}
 
-For each estimates we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the coverage of the 95\% confidence intervals and accuracy of the standard error estimation from \citet{lunceford_davidian}.
+For each estimates we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the empirical coverage of the 95\% confidence intervals and accuracy of the standard error estimation from \citet{lunceford_davidian}.
 
-To calculate the bias we must have the true expectation of $Y$, which is equal to taking the expectation of $Y$ given $A = 1$:
+To calculate the bias we must have the true expectation of $Y$, which is equal to taking the expectation of $Y$ given $R = 1$:
 \begin{align*}
-    E(Y|A = 1) &= P(Y = 1|R = 1)\\
+    E(Y|R = 1) &= P(Y = 1|R = 1)\\
     &= \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1, W_1 = w_1, W_2 = w_2|R = 1) dw_1 \\
     & = \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1|W_1 = w_1, W_2 = w_2, R = 1) \\
     & \phantom{ = \int_{-2}^{2} \sum_{w_2 = 0}^{1}} \cdot P(R = 1, W_1 = w_1, W_2 = w_2)dw_1 \\
@@ -188,44 +199,55 @@ To calculate the bias we must have the true expectation of $Y$, which is equal t
 
 By calculating the above integral numerically, we get that the true mean, had all outcome variables $Y_i$ been accounted for, is about 0.53.
 
-For calculating the confidence intervals, we set the model-based sample error estimate to be 
+For calculating the confidence intervals, we set the model-based sample error estimates to be 
 \begin{align*}
     \hat{SE} = n^{-1} \sqrt{\sum_{i=1}^n \left(\frac{R_i(Y_i - m(\mathbf{W}_i))}{\pi(\mathbf{W}_i)} + m(\mathbf{W}_i) - \hat{\beta}_{DR}\right)^2}
 \end{align*}
 from \citet{lunceford_davidian}. An issue with this estimate of the standard error is that it is specifically for DR estimates with correctly specified nuisance parameters; we will cover the issue with one incorrectly specified nuisance parameter later.
 
-\begin{figure}[h]
+\begin{itemize}
+    \item Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
+    \item Figure \ref{figCIpara} shows the empirical coverage of the 95\% confidence intervals of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the standard error was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter are either too high or too low.
+    \item Figure \ref{figSEpara} confirms the statement above, as we see the ratio of the standard deviation of the DR estimates to the average standard error estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the confidence interval bounds. As for the DR estimations with one wrong model, this ratio is above or below 1, suggesting that the standard error estimation is on average too low or too high, hence giving a CI coverage that is too low or too high for these cases as the calculations of the CI bounds are inaccurate.
+\end{itemize}
+
+\begin{figure}[h!]
     \centering
     \includegraphics[width = 0.8\columnwidth]{figures/biaspara.png}
     \caption{Simulation results of bias for the various DR estimator specifications}
     \label{figbiaspara}
 \end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/CIpara.png}
+    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \label{figCIpara}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/SEpara.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figSEpara}
+\end{figure}
 
+Although these results suggest that the parametric methods for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
 
 \section{Machine Learning approaches to optimise the DR estimator}
 
+CURRENTLY A DRAFT - NO NEED FOR FEEDBACK
 
 Parametric models are more certainty but mostly produce biased estimate, but we can apply the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
 
 But convenience is over weighed by defectiveness under model misspecification as we mentioned in the previous section, so the probability of the CI containing the true mean converges to 0 \citep{diaz}
 
 
-
-
-
-
-
-
-
 Can use machine learning models to alleviate this bias.
-
-TMLE and DML are asymptotically normal and efficient under consistency assumptions on the nuisance estimators
 
 Data adaptive methods: random forests, kernel regression, outcome weighed learning, Q-learning, ensemble learners. These methods may not have quantifyable theoretical guarantees though.
 
-Double/Debiased Machine Learning for Treatment
-and Structural Parameters
-Victor Chernozhukov
+\subsection{Using Random Forests}
+
+
 
 
 
