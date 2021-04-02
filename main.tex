@@ -2,6 +2,7 @@
 \usepackage{indentfirst}
 \usepackage[nottoc]{tocbibind}
 \usepackage{fancyhdr,ragged2e}
+
 \fancyhead{}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -9,7 +10,7 @@
 % Edit these to provide the correct information
 % e.g. \newcommand{\reportauthor}{Timothy Kimber}
 
-\newcommand{\reporttitle}{Evaluating the Use of Machine Learning for DR Estimation}
+\newcommand{\reporttitle}{Evaluating the Use of Machine Learning for Doubly-Robust Estimation in Missing Data}
 \newcommand{\reportauthor}{Juliette Maiko Limozin}
 \newcommand{\supervisor}{Dr David Whitney}
 \newcommand{\degreetype}{Mathematics}
@@ -86,7 +87,7 @@ To summarise:
     \item $\mathbf{R}$: indicator on whether $Y$ is observed or not ($R = 1$: observed, $R = 0$: missing) 
 \end{itemize}
 
-A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}. So in the example of a clinical trial, we would consider the outcome to be missing at random if it is independent of the reason for the patients' drop out. The MAR setting will therefore have effects on any causal inference we may perform on this data set.
+A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}, i.e $P(R=r|\mathbf{W}, Y) = P(R= r|\mathbf{W})$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y|\mathbf{W})$. So in the example of a clinical trial, we would consider the data set obtained from the study to be MAR if given the measurements taken from the patients, the reasons why some patients dropped out were unrelated to the outcome of the trial. The MAR setting will therefore have effects on any causal inference we may perform on this data set.
 
 When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}.\\
 
@@ -96,11 +97,11 @@ We make the assumption that $(W_1, Y_1, R_1),...,(W_n, Y_n, R_n)$ are independen
 
 \subsection{Inverse Probability Weighting approach}
 
-Suppose we wish to calculate or estimate the outcome mean $\beta = E(\mathbf{Y})$. A problem occurs when trying to compute it as $\mathbg{Y}$ is only partially observed, so calculating a mean with only the observed outcomes would not be a good representation of the data outcome as a whole.
+Suppose we wish to calculate or estimate the outcome mean $\beta = E(\mathbf{Y})$. A problem occurs when trying to compute it as $\mathbf{Y}$ is only partially observed, so calculating a mean with only the observed outcomes would not be a good representation of the data outcome as a whole.
 
 One solution to this problem is the Inverse Probability Weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the probability that the $i$th individual is observed given the set of variables for this outcome, $\mathbf{W}_i$ (\citeauthor{vansteelandt}). We denote this weight by
 \begin{align*}
-    \pi(\mathbf{W})^{-1} = \frac{1}{P(R = 1|\mathbf{W})}.
+    \pi(\mathbf{W})= E(R|\mathbf{W}) = P(R = 1|\mathbf{W}).
 \end{align*}
 
 We assume that the weighting is positive for any $\mathbf{W}_i$.
@@ -114,39 +115,78 @@ As $\pi(\mathbf{W})$ is unknown as the data is missing at random, we propose a p
 
 The IPW estimator is consistent for $\beta$ if the propensity model $\pi(\mathbf{W}; \boldsymbol\alpha)$ is correctly specified \citep{davidian}. 
 
-If the propensity model $\pi(\mathbf{W})$ is correctly specified, then by the law of large numbers, $\hat{\beta}_{IPW}$ will converge almost surely to the true mean $\beta$, so the Central Limit Theorem (CLT) holds, giving $\sqrt{n}(\hat{\beta}_{IPW}-\beta) \xrightarrow{d} N(0,\sigma_1^2)$ where $\sigma$ is the estimated outcome variance, so this makes the IPW estimate consistent for $\beta$. We can then use CLT to perform inference tests and confidence intervals for the true mean.
+If the propensity model $\pi(\mathbf{W})$ is correctly specified, then by the weak law of large numbers (WLLN), $\hat{\beta}_{IPW}$ will converges in probability to the true mean $\beta$, so this makes the IPW estimate consistent for $\beta$. Using the Central Limit Theorem (CLT), we have $\sqrt{n}(\hat{\beta}_{IPW}-\beta) \xrightarrow{d} N(0,\sigma_1^2)$ where $\sigma$ is the estimated outcome variance, so we can use this result to perform inference tests and confidence intervals for the true mean.
 
-A quick drawback from the IPW estimator in \ref{IPW_est} is it is usually difficult to construct at propensity model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size n is large enough, so a removal of bias is not guaranteed by the IPW estimator when he model is misspecified. Another problem that arises is unstable weights: if the model is misspecified, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a select few, so the IPW estimator is mainly dominated by these large weights \citep{seaman}.
+A quick drawback from the IPW estimator in \ref{IPW_est} is that it is usually difficult to construct at propensity model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size $n$ is large enough, so a removal of bias is not guaranteed by the IPW estimator when he model is misspecified. Another problem that arises is unstable weights: if the model is misspecified, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a select few, so the IPW estimator is mainly dominated by these large weights \citep{seaman}.
 
-\citeauthor{kang} suggest that the model being misspecified is more likely the cause of large weights, rather than if the auxiliary variables are truly predictive of whether the outcome may be missing or not. There exist a few tests, including the \citet{hosmer} test, to detect poor fit of the propensity model.\\
+\citet{kang} suggest that the model being misspecified is more likely the cause of large weights, rather than if the auxiliary variables are truly predictive of whether the outcome may be missing or not. There exist a few tests, including the \citet{hosmer} test, to detect poor fit of the propensity model.\\
 
 \subsection{Regression imputation approach} 
 
-Alternatively, one could make use of the expectation of the outcome $Y$ given $W$, $E(Y|\mathbf{W})$, which we denote as $m(\mathbf{W})$, to have a different estimator of the mean \citep{davidian,vansteelandt}, sometimes called the regression imputation estimator: 
+Alternatively, one could make use of the conditional expectation of the outcome 
+\begin{align*}
+    m(\mathbf{W}) = E(Y|\mathbf{W})
+\end{align*}
+to have a different estimator of the mean \citep{davidian,vansteelandt}, sometimes called the regression imputation estimator: 
 
 \begin{equation}
     \hat{\beta}_ {RI} = \frac{1}{n}\sum_{i = 1}^n m(\mathbf{W}_i)
 \end{equation}
 
-Because again the true value of $m(\mathbf{W})$ is unknown, we propose an outcome model, most commonly a parametric model $m(\mathbf{W}, \gamma)$ with some parameter $\gamma$, and again we build an estimator $\hat{\gamma}$ for $\gamma$ from the sample data. Again, like in IPW, the efficiency of the the RI estimator relies on the correct specification of the outcome model, as it would also imply that CLT holds for the RI estimator. \\
+Because again the true value of $m(\mathbf{W})$ is unknown, we propose an outcome model, most commonly a parametric model $m(\mathbf{W}, \gamma)$ with some parameter $\gamma$, and again we build an estimator $\hat{\gamma}$ for $\gamma$ from the sample data. Again, like in IPW, the efficiency of the the RI estimator relies on the correct specification of the outcome model, as then the WLLN would apply and so the RI estimator would be consistent for $\beta$. \\
 
 \subsection{Augmented IPW approach} 
 
-However this motivates the idea behind the augmented IPW estimator. From \citet{davidian}, estimators of $\beta$, when the propensity model is correctly specified and the estimators are consistent and are asymptotically normal(i.e. CLT holds), are equivalent to 
+However this motivates the idea behind the augmented IPW estimator. One could think of combining the ideas from the IPW and RI estimators. From \citet{davidian}, estimators of $\beta$, when the propensity model is correctly specified and the estimators are consistent and are asymptotically normal(i.e. CLT holds), are equivalent to 
 
 \begin{equation}
     \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} - \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) h(\mathbf{W}_i)
 \end{equation}
 
-This is called an augmented IPW as it is the sum of the IPW estimator and an augmentation term depending on $h(\mathbf{W})$ \cite{davidian}. By taking $-h(\mathbf{W}) = m(\mathbf{W}, \hat{\gamma})$, we have a new estimator
+This is called an augmented IPW as it is the sum of the IPW estimator and an augmentation term depending on $h(\mathbf{W})$ \citep{davidian}. By taking $-h(\mathbf{W}) = m(\mathbf{W}, \hat{\gamma})$ like in the RI approach, we have a new estimator
 \begin{equation}
     \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
-$\hat\beta_{DR}$ is consistent and asymptotically normal when either the propensity or outcome model are correctly specified, as the correct specification of one suffices for the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire distribution whilst maintaining a better efficiency than IPW estimators \citep{vansteelandt}.
+$\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome ans missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{vansteelandt}.
 
-For example, doubly-robust estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations to compute a DR estimation of the mean. \\
+For example, doubly-robust estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations on patients to compute a DR estimation of the mean. \\
 
+The proof of the doubly-robustness of this mean estimation is as follows, mainly taken from \citet{vansteelandt}.
+
+Rewriting $\hat{\beta}_{DR}$, we use the WLLN to get
+\begin{align*}
+    \hat{\beta}_{DR} & = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma) \\
+    & = \frac{1}{n}\sum_{i=1}^{n} Y_i + \frac{1}{n}\sum_{i=1}^{n}\left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) (m(\mathbf{W}_i, \hat\gamma)-Y_i) \\
+    & \xrightarrow{p} E(Y_1) + E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right] \text{ (WLLN)} \\
+    & \phantom{\xrightarrow{p} E(Y_1)} = \beta + E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right]
+\end{align*}
+
+So the DR estimator is a consistent estimator for the true mean $\beta$ if the expectation added to $\beta$ above is equal to 0.
+
+\textbf{Case 1:} Suppose the propensity score $\pi(\mathbf{W},\hat{\alpha})$ is correctly specified and $\hat{\alpha} \xrightarrow{p} \alpha$, therefore  $\pi(\mathbf{W},\hat{\alpha}) \xrightarrow{p} \pi(\mathbf{W}) = E(R|\mathbf{W}) = E(R|\mathbf{W}, Y)$ under MAR assumption. Then using the tower rule on expectations, we have
+\begin{align*}
+     & E \left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right]  \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)|Y_1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right)|Y_1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{\pi(\mathbf{W_1},\hat{\alpha})} \right)\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{E(R_1|Y_1, \mathbf{W}_1)} \right)\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = 0
+\end{align*}
+Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.
+
+\textbf{Case 2:} Suppose the outcome model $m(\mathbf{W}, \hat\gamma)$ is correctly specified and $\hat{\gamma} \xrightarrow{p} \gamma$, therefore  $m(\mathbf{W}, \hat\gamma) \xrightarrow{p} m(\mathbf{W}) = E(Y|\mathbf{W}) = E(Y|\mathbf{W}, R)$ under MAR assumption. Then a similar manner to case 1, we have
+\begin{align*}
+     & E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right)(m(\mathbf{W}_1, \hat\gamma)-Y_1)|R_1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) E\left[(m(\mathbf{W}_1, \hat\gamma)-Y_1)|R_1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-E\left[Y_1|R_1, \mathbf{W}_1\right])\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (E\left[Y_1|R_1, \mathbf{W}_1\right])-E\left[Y_1|R_1, \mathbf{W}_1\right])\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = 0
+\end{align*}
+Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.
+
+Thus we have shown that when at least one of the two models is correctly specified, the DR estimator is consistent for the true mean. It follows naturally that if both models are correctly specified, this result still holds.
 \subsection{Parametric DR estimator}
 
 In standard parametric DR estimation, it is fairly common to define the propensity and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages.\\
@@ -156,6 +196,7 @@ Although this version of the DR estimator that these models lead to has been est
 Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome (\citeauthor{vansteelandt}).
 
 \subsection{Simulation study of parametric DR}
+\label{para_model}
 
 Let us look at an example to illustrate the use of parametric DR estimators. We take the model specification from \citet{benkeser2017}: our co-variate vector is $\mathbf{W} = (W_1, W_2)$, where $W_1$ is uniformly distributed over $[-2,2]$ and $W_2$ has a Bernoulli distribution of success probability $1/2$. $W_1$ and $W_2$ are independent. The missingness indicator $R$ is a Bernoulli random variable of success probability $\expit(-w_1 + 2w_1w_2)$. The true propensity score is therefore
 \begin{align*}
@@ -234,26 +275,69 @@ Although these results suggest that the parametric methods for setting the nuisa
 
 \section{Machine Learning approaches to optimise the DR estimator}
 
-CURRENTLY A DRAFT - NO NEED FOR FEEDBACK
+Parametric models for the propensity score and outcome regression give more certainty, thanks to their explicit formulae and theoretical backings, but we have seen in the simulation study above that even a slight misspecification can lead to biased estimations. However we can apply asymptotic results such as the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
 
-Parametric models are more certainty but mostly produce biased estimate, but we can apply the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
+But convenience is over weighed by defectiveness under model misspecification as we mentioned, so the probability of the CI containing the true mean converges to 0 \citep{diaz}.
 
-But convenience is over weighed by defectiveness under model misspecification as we mentioned in the previous section, so the probability of the CI containing the true mean converges to 0 \citep{diaz}
+Alternatively, one can use machine learning models to alleviate this bias, as they often provide models that are data adaptive and therefore easier to specify.
 
-
-Can use machine learning models to alleviate this bias.
-
-Data adaptive methods: random forests, kernel regression, outcome weighed learning, Q-learning, ensemble learners. These methods may not have quantifyable theoretical guarantees though.
+Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, ensemble learners. These methods may not have quantifiable theoretical guarantees though. In the following sections we will take a closer look at the use of the first three methods in DR estimation -- Random Forests, Supper Vector Machines and Kernel Regression -- with various settings.
 
 \subsection{Using Random Forests}
 
+Random forests are a beginner friendly Machine Learning tool that create a classification based on multiple randomly generated decision trees. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also comfortable working with a mix of continuous and categorical features. However it is not the most time efficient tool, as the training of the models requires a lot of computational power. 
 
+\subsubsection{Simulation 1: 2 features}
 
+We use the same data generated in section \ref{para_model}, and this time we calculate DR estimators with various nuisance parameter settings that use logistic regression or random forests:
+\begin{itemize}
+    \item \texttt{DR logistic ps, forest om}: the propensity is a correctly specified logistic regression, and the outcome model is a random forest. Both model account for the interaction term between $W_1$ and $W_2$
+    \item \texttt{DR logistic om, forest ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a random forest.
+    \item \texttt{DR forest}: both the propensity and the outcome model are random forests that account for the interaction term between $W_1$ and $W_2$.
+    \item \texttt{DR wrong logistic om, forest ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score is a correctly specified random forest.
+    \item \texttt{DR wrong logistic ps, forest om}: the propensity is an incorrectly specified logistic regression, and the outcome model is a correctly specified random forest.
+    \item \texttt{DR wrong forest om, forest ps}: the outcome model is an incorrectly specified random forest (i.e no interaction term), and the propensity score is a correctly specified random forest.
+    \item \texttt{DR wrong forest ps, forest om}: the propensity is an incorrectly specified random forest (i.e no interaction term), and the outcome model is a correctly specified random forest.
+    \item \texttt{DR wrong forest ps \& om}: both the propensity and the outcome model are incorrectly specified random forests.
+    \item \texttt{DR exact}: both the propensity and outcome model are exactly specified by using the distributions from the data generative methods.
+\end{itemize}
 
+Each time a random forest is specified, it goes through a stratified 5-fold cross validation of hyper parameters in order to input the parameters that give a forest with the best accuracy on the test sets. 
 
+As before, we obtain an empirical bias by taking the sample mean of 2500 generated estimators of each sample size varying from 200 to 1000 rows.
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/rf_2W_bias.png}
+    \caption{Simulation results of bias for the various DR estimator specifications}
+    \label{figbiaspara}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/rf_2W_CI.png}
+    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \label{figCIpara}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/rf_2W_SE.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figSEpara}
+\end{figure}
 
+\subsubsection{Simulation 2: 4 features}
 
+\subsection{Using Support Vector Machines}
+
+\subsection{Using Kernel Regression}
+
+\subsection{Comparison of the three methods}
+
+\section{Discussion}
+
+\section{Conclusion}
+
+\section{Appendix}
 %% bibliography
 \clearpage
 \bibliographystyle{unsrtnat}
