@@ -2,7 +2,7 @@
 \usepackage{indentfirst}
 \usepackage[nottoc]{tocbibind}
 \usepackage{fancyhdr,ragged2e}
-
+\usepackage{todonotes}
 \fancyhead{}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -51,7 +51,7 @@ I would like to thank my project supervisor, Dr David Whitney, for his continued
 
 I would also like to thank my family, who even though might not understand Statistics at a Master's level, have always enabled me to achieve my best.
 
-Last but not least, I would like to thank my various statistics lecturers who, in my 4 years at Imperial, have infected me with their passion for Statistics.
+Last but not least, I would like to thank my various statistics lecturers who, in my 4 years at Imperial, have enamoured me with their passion for Statistics.
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 
@@ -68,6 +68,7 @@ Last but not least, I would like to thank my various statistics lecturers who, i
 \setcitestyle{authoryear,open={(},close={)}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction} 
+\todo[inline]{Finish introduction}
 
 - Clinical trials often have reserve patients because the trial patients might drop out for x and y reason
 
@@ -225,6 +226,7 @@ From there we calculated four parametric DR estimates:
 For each estimates we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the empirical coverage of the 95\% confidence intervals and accuracy of the standard error estimation from \citet{lunceford_davidian}.
 
 To calculate the bias we must have the true expectation of $Y$, which is equal to taking the expectation of $Y$ given $R = 1$:
+
 \begin{align*}
     E(Y|R = 1) &= P(Y = 1|R = 1)\\
     &= \int_{-2}^{2} \sum_{w_2 = 0}^{1} P(Y = 1, W_1 = w_1, W_2 = w_2|R = 1) dw_1 \\
@@ -270,6 +272,12 @@ from \citet{lunceford_davidian}. An issue with this estimate of the standard err
     \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSEpara}
 \end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/sqrtnpara.png}
+    \caption{Simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \label{figsqrtnpara}
+\end{figure}
 
 Although these results suggest that the parametric methods for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
 
@@ -279,9 +287,9 @@ Parametric models for the propensity score and outcome regression give more cert
 
 But convenience is over weighed by defectiveness under model misspecification as we mentioned, so the probability of the CI containing the true mean converges to 0 \citep{diaz}.
 
-Alternatively, one can use machine learning models to alleviate this bias, as they often provide models that are data adaptive and therefore easier to specify.
+Alternatively, one can use machine learning models to alleviate this bias, as they often provide models that are data adaptive and therefore easier to get a correctly specified model. In fact, \citet{ps_SL} have shown that when the propensity score is incorrectly specified, the use of Machine Learning tools for specifying the outcome regression can still give an unbiased DR estimator, which is an advantage over the parametric scenario, as we'd seen an incorrect propensity score with correct outcome regression was still giving the worse DR estimator in terms of bias in section \ref{para_model}.
 
-Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, ensemble learners. These methods may not have quantifiable theoretical guarantees though. In the following sections we will take a closer look at the use of the first three methods in DR estimation -- Random Forests, Supper Vector Machines and Kernel Regression -- with various settings.
+Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. However, these methods may not have quantifiable theoretical guarantees. In the following sections we will take a closer look at the use of Random Forests, Support Vector Machines and Multi-layer Perceptron with various data settings, and see if these data adaptive methods give better estimates compared to the results from parametric models.
 
 \subsection{Using Random Forests}
 
@@ -306,6 +314,7 @@ Each time a random forest is specified, it goes through a stratified 5-fold cros
 
 As before, we obtain an empirical bias by taking the sample mean of 2500 generated estimators of each sample size varying from 200 to 1000 rows.
 
+\todo[inline]{Update plots and comment on results}
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/rf_2W_bias.png}
@@ -329,7 +338,7 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
 
 \subsection{Using Support Vector Machines}
 
-\subsection{Using Kernel Regression}
+\subsection{Using Multi-Layer Perceptrons}
 
 \subsection{Comparison of the three methods}
 
