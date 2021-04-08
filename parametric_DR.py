@@ -85,7 +85,6 @@ for i in range(2500):
         SEs[3,i,j] = se_ps
         
         tval = 1.96
-        
         if DR_para - tval*se_para <= B_true <= DR_para + tval*se_para:
             CI[0,i,j] = 1
         else: 
@@ -141,6 +140,7 @@ plt.hlines(0, 200, 2000, linestyles = 'dashed')
 plt.xlabel('Sample size', fontsize = 15)
 plt.ylabel('Bias', fontsize = 15)
 plt.title('Emperial bias convergence of various DR estimators', fontsize = 15)
+plt.savefig('figures/biaspara.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -154,6 +154,7 @@ plt.plot(N,np.mean(CI[3,:,:], axis = 0), label = 'DR wrong propensity score',
 plt.hlines(0.95, 200, 2000, linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size', fontsize = 15)
 plt.legend()
+plt.savefig('figures/CIpara.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -166,6 +167,7 @@ plt.hlines(1, 200, 2000, linestyles = 'dashed')
 plt.xlabel('Sample size', fontsize = 15)
 plt.ylabel(r'SD($ \hat \beta )/ \widebar{\widehat{se}_{n}}$', fontsize = 15)
 plt.title('Ratio of standard deviation to mean standard error estimates', fontsize = 15)
+plt.savefig('figures/SEpara.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -178,4 +180,29 @@ plt.hlines(0, 200, 2000, linestyles = 'dashed')
 plt.xlabel('Sample size', fontsize = 15)
 plt.ylabel('$\sqrt{N}$Bias', fontsize = 15)
 plt.title('$\sqrt{N}$bias convergence of various DR estimators', fontsize = 15)
+plt.savefig('figures/sqrtnpara.png')
 plt.show()
+
+labels = ['DR logistic', 'DR right models', 'DR wrong outcome model',
+          'DR wrong propensity score']
+fig, ax = plt.subplots(2,2,figsize = (10,6.6), sharex= True, sharey= True)
+for i in range(2):
+    ax[i,0].hist(estimates[i,:,-1], alpha = 0.5 )
+    ax[i,0].set_title(labels[i])
+    ax[i,0].set_xlabel('Estimate value')
+    ax[i,0].set_ylabel('Count')
+    ax[i,0].vlines(B_true, 0, 700)
+for i in range(2,4):
+    ax[i-2,1].hist(estimates[i,:,-1], alpha = 0.5)
+    ax[i-2,1].set_title(labels[i])
+    ax[i-2,1].set_xlabel('Estimate value')
+    ax[i-2,1].set_ylabel('Count')
+    if i == 3:
+        ax[i-2,1].vlines(B_true, 0, 700, label = 'True mean')
+    else:
+        ax[i-2,1].vlines(B_true, 0, 700)
+fig.legend()
+fig.suptitle(r'Histograms of estimates for sample size $N = 2000$')
+plt.savefig('figures/histpara.png')
+plt.show()
+    
