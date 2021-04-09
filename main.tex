@@ -278,6 +278,12 @@ from \citet{lunceford_davidian}. An issue with this estimate of the standard err
     \caption{Simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnpara}
 \end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/histpara.png}
+    \caption{Histogram of simulation results for  sample size $N = 2000$}
+    \label{fighistpara}
+\end{figure}
 
 Although these results suggest that the parametric methods for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
 
