@@ -87,7 +87,7 @@ abstract = {Abstract Estimation of treatment effects with causal interpretation 
 year = {2004}
 }
 
-@article{https://doi.org/10.1002/sim.6842,
+@article{ps_SL,
 author = {Li, Jiaqi and Handorf, Elizabeth and Bekelman, Justin and Mitra, Nandita},
 title = {Propensity score and doubly robust methods for estimating the effect of treatment on censored cost},
 journal = {Statistics in Medicine},
@@ -95,9 +95,6 @@ volume = {35},
 number = {12},
 pages = {1985-1999},
 keywords = {propensity scores, doubly robust estimation, cost estimation, observational studies, super learner},
-doi = {https://doi.org/10.1002/sim.6842},
-url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.6842},
-eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/sim.6842},
 abstract = {The estimation of treatment effects on medical costs is complicated by the need to account for informative censoring, skewness, and the effects of confounders. Because medical costs are often collected from observational claims data, we investigate propensity score (PS) methods such as covariate adjustment, stratification, and inverse probability weighting taking into account informative censoring of the cost outcome. We compare these more commonly used methods with doubly robust (DR) estimation. We then use a machine learning approach called super learner (SL) to choose among conventional cost models to estimate regression parameters in the DR approach and to choose among various model specifications for PS estimation. Our simulation studies show that when the PS model is correctly specified, weighting and DR perform well. When the PS model is misspecified, the combined approach of DR with SL can still provide unbiased estimates. SL is especially useful when the underlying cost distribution comes from a mixture of different distributions or when the true PS model is unknown. We apply these approaches to a cost analysis of two bladder cancer treatments, cystectomy versus bladder preservation therapy, using SEER-Medicare data. Copyright © 2015 John Wiley \& Sons, Ltd.},
 year = {2016}
 }
@@ -200,4 +197,19 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/sim.7980},
 note = { sim.7980},
 abstract = {The weighted average treatment effect is a causal measure for the comparison of interventions in a specific target population, which may be different from the population where data are sampled from. For instance, when the goal is to introduce a new treatment to a target population, the question is what efficacy (or effectiveness) can be gained by switching patients from a standard of care (control) to this new treatment, for which the average treatment effect for the control estimand can be applied. In this paper, we propose two estimators based on augmented inverse probability weighting to estimate the weighted average treatment effect for a well-defined target population (ie, there exists a predefined target function of covariates that characterizes the population of interest, for example, a function of age to focus on elderly diabetic patients using samples from the US population). The first proposed estimator is doubly robust if the target function is known or can be correctly specified. The second proposed estimator is doubly robust if the target function has a linear dependence on the propensity score, which can be used to estimate the average treatment effect for the treated and the average treatment effect for the control. We demonstrate the properties of the proposed estimators through theoretical proof and simulation studies. We also apply our proposed methods in a comparison of glucagon-like peptide-1 receptor agonists therapy and insulin therapy among patients with type 2 diabetes, using the UK Clinical Practice Research Datalink data.},
 year = {2019}
+}
+
+@article{setoguchi-nn,
+author = {Setoguchi, Soko and Schneeweiss, Sebastian and Brookhart, M. Alan and Glynn, Robert J. and Cook, E. Francis},
+title = {Evaluating uses of data mining techniques in propensity score estimation: a simulation study},
+journal = {Pharmacoepidemiology and Drug Safety},
+volume = {17},
+number = {6},
+pages = {546-555},
+keywords = {propensity score, logistic regression, neural networks, recursive partitioning},
+doi = {https://doi.org/10.1002/pds.1555},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/pds.1555},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/pds.1555},
+abstract = {Abstract Background In propensity score modeling, it is a standard practice to optimize the prediction of exposure status based on the covariate information. In a simulation study, we examined in what situations analyses based on various types of exposure propensity score (EPS) models using data mining techniques such as recursive partitioning (RP) and neural networks (NN) produce unbiased and/or efficient results. Method We simulated data for a hypothetical cohort study (n = 2000) with a binary exposure/outcome and 10 binary/continuous covariates with seven scenarios differing by non-linear and/or non-additive associations between exposure and covariates. EPS models used logistic regression (LR) (all possible main effects), RP1 (without pruning), RP2 (with pruning), and NN. We calculated c-statistics (C), standard errors (SE), and bias of exposure-effect estimates from outcome models for the PS-matched dataset. Results Data mining techniques yielded higher C than LR (mean: NN, 0.86; RPI, 0.79; RP2, 0.72; and LR, 0.76). SE tended to be greater in models with higher C. Overall bias was small for each strategy, although NN estimates tended to be the least biased. C was not correlated with the magnitude of bias (correlation coefficient [COR] = −0.3, p = 0.1) but increased SE (COR = 0.7, p < 0.001). Conclusions Effect estimates from EPS models by simple LR were generally robust. NN models generally provided the least numerically biased estimates. C was not associated with the magnitude of bias but was with the increased SE. Copyright © 2008 John Wiley \& Sons, Ltd.},
+year = {2008}
 }
