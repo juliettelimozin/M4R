@@ -21,9 +21,11 @@ A = np.random.binomial(1, expit(-W1 + 2*np.multiply(W1,W2)), 1000000)
 Y =np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2)), 1000000)
 
 B_true = np.mean(expit(0.2-W1+ 2*np.multiply(W1,W2)))
-N = int(os.getenv('PBS_ARRAYID'))
+
+N = 200
+#N = int(os.getenv('PBS_ARRAYID'))
 random.seed(N+1234)
-iters = 2500
+iters = 3
 
 estimates = np.zeros((9,iters))
 CI = np.zeros((9,iters))
@@ -89,6 +91,6 @@ for i in range(iters):
         else:
             CI[k,i] = 0
        
-np.save('estimates_SVM'+str(N)+'.npy',estimates)
-np.save('CI_SVM'+str(N)+'.npy', CI)
-np.save('SEs_SVM'+str(N)+'.npy', SEs)
+np.save('estimates_SVM_'+str(N)+'.npy',estimates)
+np.save('CI_SVM_'+str(N)+'.npy', CI)
+np.save('SEs_SVM_'+str(N)+'.npy', SEs)

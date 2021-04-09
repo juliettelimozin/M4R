@@ -51,13 +51,13 @@ def SVM_crossval(Xtrain, ytrain, Xtest,):
     #Fit it to the train set
     cv=skf.split(Xtrain, ytrain)
     tuned_params = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4, 1e-5],
-                     'C': [1, 10, 100, 1000]},
+                     'C': [ 10, 100, 1000]},
                     {'kernel': ['linear'], 
-                     'C': [1, 10, 100, 1000]},
+                     'C': [10, 100, 1000]},
                     {'kernel': ['poly'], 
                      'gamma': [1e-3, 1e-4, 1e-5], 
                      'degree': np.arange(1,int(Xtrain.shape[1])+1,1), 
-                     'C': [1, 10, 100, 1000]}]
+                     'C': [10, 100, 1000]}]
     # Set GridSearch CV with model to tune as RFC, grid of hyperparameters, cross validation method as
     # stratified K fold, and the scoring method as the  the accuracy of your validation predictions
     gridSVM = GridSearchCV(SVC(probability = True), tuned_params, cv = cv, 
@@ -75,8 +75,8 @@ def MLP_crossval(Xtrain, ytrain, Xtest,):
     #Fit it to the train set
     cv=skf.split(Xtrain, ytrain)
     tuned_params = {'hidden_layer_sizes': [(10,20,30), (50,50), (100,)],
-                    'learning_rate':['constant', 'invscaling', 'adaptive'],
-                    'learning_rate_init': [0.001,0.0001,0.01],
+                    'learning_rate':['invscaling', 'adaptive'],
+                    'learning_rate_init': [0.001,0.0001],
                     'power_t':[0.25,0.5,0.75]
                     }
     # Set GridSearch CV with model to tune as RFC, grid of hyperparameters, cross validation method as
@@ -136,4 +136,3 @@ class DR_estimator:
                    + (np.ones(self.size)-self.A*(1/self.ps))*self.om)
         se = np.sqrt(np.sum(np.square(self.A*(self.Y-self.om)*(1/self.ps)+self.om - DR*np.ones(self.size))))/self.size
         return DR, se 
-!scp Desktop/Maths/Year_4/M4R/DR_estimation.py jml4617@macomp001.ma.ic.ac.uk:/home/ma/j/jml4617/M4R
