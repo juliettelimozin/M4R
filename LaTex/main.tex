@@ -149,7 +149,7 @@ This is called an augmented IPW as it is the sum of the IPW estimator and an aug
     \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
-$\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome ans missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{vansteelandt}.
+$\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome ans missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{bangrobins,vansteelandt}.
 
 For example, doubly-robust estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations on patients to compute a DR estimation of the mean. \\
 
@@ -346,6 +346,7 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
 
 \subsection{Using Multi-Layer Perceptrons}
 
+This section is motivated by the publication by \citet{setoguchi-nn} suggesting that Neura Networks reduce the bias of propensity scores compared to logistic regression.
 \subsection{Comparison of the three methods}
 
 \section{Discussion}
