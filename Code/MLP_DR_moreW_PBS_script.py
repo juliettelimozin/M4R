@@ -13,7 +13,7 @@ from sklearn.linear_model import LogisticRegression
 random.seed(1234)
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-from DR_estimation import DR_estimator, SVM_crossval
+from DR_estimation import DR_estimator, MLP_crossval
 
 W1 = np.random.uniform(-2,2,1000000)
 W2 = np.random.binomial(1,0.5,1000000)
@@ -24,10 +24,9 @@ Y = np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.mult
 
 B_true = np.mean(expit(0.2-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)))
 
-N = 200
-#N = int(os.getenv('PBS_ARRAYID'))
+N = int(os.getenv('PBS_ARRAYID'))
 random.seed(N+1234)
-iters = 3
+iters = 2500
 
 estimates = np.zeros((9,iters))
 CI = np.zeros((9,iters))
@@ -46,15 +45,15 @@ for i in range(iters):
     W_r[:,3] = W3*W4
     
     ps_log = LogisticRegression().fit(W_r,A).predict_proba(W_r)[:,1]
-    ps_f = SVM_crossval(W_r, A, W_r)
+    ps_f = MLP_crossval(W_r, A, W_r)
     ps_w_log = LogisticRegression().fit(W,A).predict_proba(W)[:,1]
-    ps_w_f = SVM_crossval(W, A, W)
+    ps_w_f = MLP_crossval(W, A, W)
     ps_r = expit(-W1 + 2*np.multiply(W1,W2))
     
     om_log = LogisticRegression().fit(W_r[A==1],Y[A==1]).predict_proba(W_r)[:,1]
-    om_f = SVM_crossval(W_r[A==1], Y[A==1], W_r)
+    om_f = MLP_crossval(W_r[A==1], Y[A==1], W_r)
     om_w_log = LogisticRegression().fit(W[A==1],Y[A==1]).predict_proba(W)[:,1]
-    om_w_f = SVM_crossval(W[A==1],Y[A==1], W)
+    om_w_f = MLP_crossval(W[A==1],Y[A==1], W)
     om_r = expit(0.2-W1 + 2*np.multiply(W1,W2))
     
     
@@ -96,6 +95,6 @@ for i in range(iters):
         else:
             CI[k,i] = 0
        
-np.save('estimates_SVM_moreW_'+str(N)+'.npy',estimates)
-np.save('CI_SVM_moreW_'+str(N)+'.npy', CI)
-np.save('SEs_SVM_moreW_'+str(N)+'.npy', SEs)
+np.save('estimates_MLP_moreW_'+str(N)+'.npy',estimates)
+np.save('CI_MLP_moreW_'+str(N)+'.npy', CI)
+np.save('SEs_MLP_moreW_'+str(N)+'.npy', SEs)

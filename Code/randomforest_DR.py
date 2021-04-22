@@ -23,7 +23,7 @@ Y =np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2)), 1000000)
 B_true = np.mean(expit(0.2-W1+ 2*np.multiply(W1,W2)))
 
 iters = 2500
-N = [200*i for i in range(1,11)]
+N = [200*i for i in range(1,6)]
 
 estimates = np.zeros((9,iters,len(N)))
 CI = 1.0*estimates
@@ -62,17 +62,20 @@ for i in range(9):
     plt.plot(N, bias[i,:], label = labels[i], marker = 'o')
 plt.legend()
 plt.hlines(0, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
-plt.xlabel('Sample size')
-plt.ylabel('Bias')
-plt.title('Emperial bias convergence of various DR estimators')
+plt.xlabel('Sample size', fontsize = 15)
+plt.ylabel('Bias', fontsize = 15)
+plt.title('Emperial bias convergence of various DR estimators', fontsize = 15)
+plt.savefig('../figures/biasRF.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
-plt.title('Coverage of 95% confidence intervals')
+plt.title('Coverage of 95% confidence intervals', fontsize = 15)
 for i in range(9):
     plt.plot(N,np.mean(CI[i,:,:], axis = 0), label = labels[i], marker = 'o')
 plt.hlines(0.95, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
-plt.xlabel('Sample size')
+plt.xlabel('Sample size', fontsize =15)
+plt.ylabel('Coverage', fontsize = 15)
+plt.savefig('../figures/CIRF.png')
 plt.legend()
 plt.show()
 
@@ -81,9 +84,10 @@ for i in range(9):
     plt.plot(N, se_ratio[i,:], label = labels[i], marker = 'o')
 plt.legend()
 plt.hlines(1, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
-plt.xlabel('Sample size')
-plt.ylabel('SD(estimates of mean)/mean(estimates of standard error)')
-plt.title('Ratio of standard deviation to mean standard error estimates')
+plt.xlabel('Sample size', fontsize = 15)
+plt.ylabel(r'SD($ \hat \beta )/ \widebar{\widehat{se}_{n}}$', fontsize = 15)
+plt.title('Ratio of standard deviation to mean standard error estimates', fontsize = 15)
+plt.savefig('../figures/SERF.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -91,7 +95,47 @@ for i in range(9):
     plt.plot(N, np.multiply(np.sqrt(N),bias[i,:]), label = labels[i], marker = 'o')
 plt.legend()
 plt.hlines(0, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
-plt.xlabel('Sample size')
-plt.ylabel('Bias')
-plt.title('sqrt(n)*bias convergence of various DR estimators')
+plt.xlabel('Sample size', fontsize = 15)
+plt.ylabel('$\sqrt{N}$Bias', fontsize = 15)
+plt.title('$\sqrt{N}$bias convergence of various DR estimators', fontsize = 15)
+plt.savefig('../figures/sqrtnRF.png')
+plt.show()
+
+
+fig, ax = plt.subplots(2,2,figsize = (10,6.6), sharex= True, sharey= True)
+ax[0,0].hist(estimates[2,:,-1],bins = np.linspace(min(estimates[2,:,-1]),
+                                           max(estimates[2,:,-1]),
+                                           75), alpha = 0.5 )
+ax[0,0].set_title(labels[2])
+ax[0,0].set_xlabel('Estimate value', fontsize = 15)
+ax[0,0].set_ylabel('Count', fontsize = 15)
+ax[0,0].vlines(B_true, 0, 120)
+
+ax[0,1].hist(estimates[7,:,-1],bins = np.linspace(min(estimates[7,:,-1]),
+                                           max(estimates[7,:,-1]),
+                                           75), alpha = 0.5 )
+ax[0,1].set_title(labels[7])
+ax[0,1].set_xlabel('Estimate value', fontsize = 15)
+ax[0,1].set_ylabel('Count', fontsize = 15)
+ax[0,1].vlines(B_true, 0, 120)
+
+ax[1,1].hist(estimates[6,:,-1],bins = np.linspace(min(estimates[6,:,-1]),
+                                           max(estimates[6,:,-1]),
+                                           75), alpha = 0.5 )
+ax[1,1].set_title(labels[6])
+ax[1,1].set_xlabel('Estimate value', fontsize = 15)
+ax[1,1].set_ylabel('Count', fontsize = 15)
+ax[1,1].vlines(B_true, 0, 120)
+
+ax[1,0].hist(estimates[5,:,-1],bins = np.linspace(min(estimates[5,:,-1]),
+                                           max(estimates[5,:,-1]),
+                                           75), alpha = 0.5 )
+ax[1,0].set_title(labels[5])
+ax[1,0].set_xlabel('Estimate value', fontsize = 15)
+ax[1,0].set_ylabel('Count', fontsize = 15)
+ax[1,0].vlines(B_true, 0, 120,label = 'True mean')
+
+fig.legend()
+fig.suptitle(r'Histograms of estimates for sample size $N = 1000$', fontsize = 15)
+plt.savefig('../figures/histRF.png')
 plt.show()
