@@ -207,9 +207,18 @@ volume = {17},
 number = {6},
 pages = {546-555},
 keywords = {propensity score, logistic regression, neural networks, recursive partitioning},
-doi = {https://doi.org/10.1002/pds.1555},
-url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/pds.1555},
-eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/pds.1555},
 abstract = {Abstract Background In propensity score modeling, it is a standard practice to optimize the prediction of exposure status based on the covariate information. In a simulation study, we examined in what situations analyses based on various types of exposure propensity score (EPS) models using data mining techniques such as recursive partitioning (RP) and neural networks (NN) produce unbiased and/or efficient results. Method We simulated data for a hypothetical cohort study (n = 2000) with a binary exposure/outcome and 10 binary/continuous covariates with seven scenarios differing by non-linear and/or non-additive associations between exposure and covariates. EPS models used logistic regression (LR) (all possible main effects), RP1 (without pruning), RP2 (with pruning), and NN. We calculated c-statistics (C), standard errors (SE), and bias of exposure-effect estimates from outcome models for the PS-matched dataset. Results Data mining techniques yielded higher C than LR (mean: NN, 0.86; RPI, 0.79; RP2, 0.72; and LR, 0.76). SE tended to be greater in models with higher C. Overall bias was small for each strategy, although NN estimates tended to be the least biased. C was not correlated with the magnitude of bias (correlation coefficient [COR] = −0.3, p = 0.1) but increased SE (COR = 0.7, p < 0.001). Conclusions Effect estimates from EPS models by simple LR were generally robust. NN models generally provided the least numerically biased estimates. C was not associated with the magnitude of bias but was with the increased SE. Copyright © 2008 John Wiley \& Sons, Ltd.},
 year = {2008}
+}
+
+@article{bangrobins,
+author = {Bang, Heejung and Robins, James M.},
+title = {Doubly Robust Estimation in Missing Data and Causal Inference Models},
+journal = {Biometrics},
+volume = {61},
+number = {4},
+pages = {962-973},
+keywords = {Causal inference, Doubly robust estimation, Longitudinal data, Marginal structural model, Missing data, Semiparametrics},
+abstract = {Summary The goal of this article is to construct doubly robust (DR) estimators in ignorable missing data and causal inference models. In a missing data model, an estimator is DR if it remains consistent when either (but not necessarily both) a model for the missingness mechanism or a model for the distribution of the complete data is correctly specified. Because with observational data one can never be sure that either a missingness model or a complete data model is correct, perhaps the best that can be hoped for is to find a DR estimator. DR estimators, in contrast to standard likelihood-based or (nonaugmented) inverse probability-weighted estimators, give the analyst two chances, instead of only one, to make a valid inference. In a causal inference model, an estimator is DR if it remains consistent when either a model for the treatment assignment mechanism or a model for the distribution of the counterfactual data is correctly specified. Because with observational data one can never be sure that a model for the treatment assignment mechanism or a model for the counterfactual data is correct, inference based on DR estimators should improve upon previous approaches. Indeed, we present the results of simulation studies which demonstrate that the finite sample performance of DR estimators is as impressive as theory would predict. The proposed method is applied to a cardiovascular clinical trial.},
+year = {2005}
 }
