@@ -27,7 +27,7 @@ def RF_crossval(Xtrain, ytrain, Xtest,):
     
     # Choose the values of the number of decision trees, their depth and 
     # the maximum number of descriptors (features) randomly chosen at each split that I want to test out with GridSearchCV
-    n_estimators = np.arange(600,1001,200)
+    n_estimators = np.arange(100,4000,200)
     max_depth = np.arange(10,31,5)
     max_features = np.arange(1,int(Xtrain.shape[1])+1,1)
     
@@ -40,6 +40,7 @@ def RF_crossval(Xtrain, ytrain, Xtest,):
     gridF = GridSearchCV(RandomForestClassifier(), hyperF, cv = cv, scoring = 'accuracy', verbose = 1, 
                           n_jobs = -1)
     gridF.fit(Xtrain, ytrain)
+    print(gridF.best_params_)
     output =  gridF.predict_proba(Xtest)[:,1]
     output[np.logical_and(0<= output, output<0.000001)] = 0.000001
     output[np.logical_and(0> output, output>-0.000001)] = -0.000001
@@ -75,13 +76,14 @@ def MLP_crossval(Xtrain, ytrain, Xtest,):
     #Fit it to the train set
     cv=skf.split(Xtrain, ytrain)
     tuned_params = {'hidden_layer_sizes': [(10,20,30), (50,50), (100,)],
-                    'learning_rate':['invscaling', 'adaptive'],
-                    'learning_rate_init': [0.001,0.0001],
-                    'power_t':[0.25,0.5,0.75]
+                    'learning_rate':['constant','invscaling', 'adaptive'],
+                    'activation': ["logistic", "relu", "Tanh"],
+                    'alpha': [10.0 **(-i) for i in range(1,5)]
                     }
     # Set GridSearch CV with model to tune as RFC, grid of hyperparameters, cross validation method as
     # stratified K fold, and the scoring method as the  the accuracy of your validation predictions
-    gridMLP = GridSearchCV(MLPClassifier(solver = 'sgd', max_iter = 500, activation = 'logistic'), tuned_params, cv = cv, 
+    gridMLP = GridSearchCV(MLPClassifier(solver = 'sgd', max_iter = 500), 
+                           tuned_params, cv = cv, 
                            scoring='accuracy', verbose = 1, n_jobs = -1)
     gridMLP.fit(Xtrain, ytrain)
     output =  gridMLP.predict_proba(Xtest)[:,1]
