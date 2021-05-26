@@ -163,7 +163,7 @@ Rewriting $\hat{\beta}_{DR}$, we use the WLLN to get
     & \phantom{\xrightarrow{p} E(Y_1)} = \beta + E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right]
 \end{align*}
 
-So the DR estimator is a consistent estimator for the true mean $\beta$ if the expectation added to $\beta$ above is equal to 0.
+So the DR estimator is a consistent estimator for the true mean $\beta$ if the expectation added to $\beta$ above is equal to 0. \\
 
 \textbf{Case 1:} Suppose the propensity score $\pi(\mathbf{W},\hat{\alpha})$ is correctly specified and $\hat{\alpha} \xrightarrow{p} \alpha$, therefore  $\pi(\mathbf{W},\hat{\alpha}) \xrightarrow{p} \pi(\mathbf{W}) = E(R|\mathbf{W}) = E(R|\mathbf{W}, Y)$ under MAR assumption. Then using the tower rule on expectations, we have
 \begin{align*}
@@ -174,7 +174,7 @@ So the DR estimator is a consistent estimator for the true mean $\beta$ if the e
      & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{E(R_1|Y_1, \mathbf{W}_1)} \right)\right] \\
      & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = 0
 \end{align*}
-Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.
+Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$. \\
 
 \textbf{Case 2:} Suppose the outcome model $m(\mathbf{W}, \hat\gamma)$ is correctly specified and $\hat{\gamma} \xrightarrow{p} \gamma$, therefore  $m(\mathbf{W}, \hat\gamma) \xrightarrow{p} m(\mathbf{W}) = E(Y|\mathbf{W}) = E(Y|\mathbf{W}, R)$ under MAR assumption. Then a similar manner to case 1, we have
 \begin{align*}
@@ -185,12 +185,12 @@ Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.
      & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (E\left[Y_1|R_1, \mathbf{W}_1\right])-E\left[Y_1|R_1, \mathbf{W}_1\right])\right] \\
      & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = 0
 \end{align*}
-Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.
+Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.\\
 
 Thus we have shown that when at least one of the two models is correctly specified, the DR estimator is consistent for the true mean. It follows naturally that if both models are correctly specified, this result still holds.
-\subsection{Parametric DR estimator}
+\subsection{Parametric DR estimation}
 
-In standard parametric DR estimation, it is fairly common to define the propensity and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages.\\
+In standard parametric DR estimation, it is fairly common to define the propensity and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages. They also offer theoretical backing that would allow us to make statistical inference.\\
 
 Although this version of the DR estimator that these models lead to has been established as the usual estimator, \citeauthor{kang} have shown it performs poorly when either the propensity or both models are misspecified, i.e when logistic and linear regressions aren't the judicious choice of models for the data. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
 
@@ -246,12 +246,13 @@ For calculating the confidence intervals, we set the model-based sample error es
 \begin{align*}
     \hat{SE} = n^{-1} \sqrt{\sum_{i=1}^n \left(\frac{R_i(Y_i - m(\mathbf{W}_i))}{\pi(\mathbf{W}_i)} + m(\mathbf{W}_i) - \hat{\beta}_{DR}\right)^2}
 \end{align*}
-from \citet{lunceford_davidian}. An issue with this estimate of the standard error is that it is specifically for DR estimates with correctly specified nuisance parameters; we will cover the issue with one incorrectly specified nuisance parameter later.
+from \citet{lunceford_davidian}.
 
 \begin{itemize}
-    \item Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
+    \item Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $\sqrt{N}$. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
     \item Figure \ref{figCIpara} shows the empirical coverage of the 95\% confidence intervals of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the standard error was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter are either too high or too low.
     \item Figure \ref{figSEpara} confirms the statement above, as we see the ratio of the standard deviation of the DR estimates to the average standard error estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the confidence interval bounds. As for the DR estimations with one wrong model, this ratio is above or below 1, suggesting that the standard error estimation is on average too low or too high, hence giving a CI coverage that is too low or too high for these cases as the calculations of the CI bounds are inaccurate.
+    \item Figure \ref{fighistpara} suggests that we indeed see asymptotic normality of the distribution, centered at the true mean, of the DR estimators that have at least one correctly specified nuisance parameter
 \end{itemize}
 
 \begin{figure}[h!]
@@ -260,46 +261,52 @@ from \citet{lunceford_davidian}. An issue with this estimate of the standard err
     \caption{Simulation results of bias for the various DR estimator specifications}
     \label{figbiaspara}
 \end{figure}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/CIpara.png}
-    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
-    \label{figCIpara}
-\end{figure}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/SEpara.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
-    \label{figSEpara}
-\end{figure}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnpara.png}
     \caption{Simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnpara}
 \end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/CIpara.png}
+    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \label{figCIpara}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/SEpara.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figSEpara}
+\end{figure}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histpara.png}
     \caption{Histogram of simulation results for  sample size $N = 2000$}
     \label{fighistpara}
 \end{figure}
+Although these results suggest that the parametric approach for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data-generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
 
-Although these results suggest that the parametric methods for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
-
+\clearpage
 \section{Machine Learning approaches to optimise the DR estimator}
 
 Parametric models for the propensity score and outcome regression give more certainty, thanks to their explicit formulae and theoretical backings, but we have seen in the simulation study above that even a slight misspecification can lead to biased estimations. However we can apply asymptotic results such as the central limit theorem and the law of large numbers for convenient asymptotic normality and confidence intervals (CI).
 
 But convenience is over weighed by defectiveness under model misspecification as we mentioned, so the probability of the CI containing the true mean converges to 0 \citep{diaz}.
 
-Alternatively, one can use machine learning models to try to alleviate this bias, as they often provide models that are data adaptive and therefore easier to get a correctly specified model. In fact, \citet{ps_SL} have shown that when the propensity score is incorrectly specified, the use of Machine Learning tools for specifying the outcome regression can still give an unbiased DR estimator, which is an advantage over the parametric scenario, as we had seen that an incorrect propensity score with correct outcome regression was still giving the worse DR estimator in terms of bias in section \ref{para_model}.
+Alternatively, one can use Machine Learning models to try to alleviate this bias, as they often provide models that are data adaptive and therefore easier to get a correctly specified model. In fact, \citet{ps_SL} have shown that when the propensity score is incorrectly specified, the use of Machine Learning tools for specifying the outcome regression can still give an unbiased DR estimator, which is an advantage over the parametric scenario, as we had seen that an incorrect propensity score with correct outcome regression was still giving the worse DR estimator in terms of bias in section \ref{para_model}.
 
-Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. However, these methods may not have quantifiable theoretical guarantees. In the following sections we will take a closer look at the use of Random Forests, Support Vector Machines and Multi-layer Perceptron with various data settings, and see if these data adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
+Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. However, these methods may not have quantifiable theoretical guarantees. In the following sections we will take a closer look at the use of Random Forests and Multi-layer Perceptron \todo{and maybe SVMs if it finishes running} with various data settings, and see if these data adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
 
 \subsection{Using Random Forests}
 
-Random forests are a beginner friendly Machine Learning tool that create a classification based on multiple randomly generated decision trees that are combined together to make a better prediction than that of a single decision tree. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also comfortable working with a mix of continuous and categorical features. However it is not the most time efficient tool, as the training of the models requires a lot of computational power.
+Random forests are a beginner friendly Machine Learning tool that create a classification or regression model based on multiple randomly generated decision trees that are combined together to make a better prediction than that of a single decision tree. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also comfortable working with a mix of continuous and categorical features. However it is not the most time efficient tool, as the training of the models requires a non-negligible amount of computational power. In this section we will explore the use of Random Forests for fitting the nuisance parameters in DR estimation.
+
+\todo[inline]{More explanation on RF}
 
 \subsubsection{Simulation 1: 2 features}
 
@@ -318,7 +325,7 @@ We use the same data generated in section \ref{para_model}, and this time we cal
 
 Each time a random forest is specified, it goes through a stratified 5-fold cross validation of hyper parameters in order to input the parameters that give a forest with the best accuracy on the test sets. 
 
-As before, we obtain an empirical bias by taking the sample mean of 2500 generated estimators of each sample size varying from 200 to 1200 rows.
+As before, we obtain an empirical bias by taking the sample mean of 2500 generated estimators of each sample size varying from 200 to 1200 rows. \\
 
 \begin{figure}[h!]
     \centering
@@ -326,18 +333,19 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
     \caption{Simulation results of bias for the various DR estimator specifications}
     \label{figbiasRF}
 \end{figure}
-\begin{figure}[h!]
+
+\begin{figure} 
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF.png}
     \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figsqrtnRF}
 \end{figure}
 
-We notice in figure \ref{figbiasRF} that the models with random forests still provide DR estimates with converging bias, even when the propensity and outcome model are set using a forest that doesn't account for the interaction term, suggesting that the forest is able to recover the misspecification, making it a useful tool in setting the nuisance parameters. 
+We notice in figure \ref{figbiasRF} that the models with random forests still provide DR estimates with converging bias, even when the propensity and outcome model are set using a forest that doesn't account for the interaction term, suggesting that the forest is able to recover the misspecification, making it a useful tool in setting the nuisance parameters. Figure \ref{figsqrtnRF} also suggests that theses models have biases with rate of convergence faster than $\sqrt{N}$.
 
 We also notice that when the outcome model was a forest and the propensity was wrongly specified with a model that doesn't account for the interaction term, whether that was a logistic regression or a Random Forest, the bias still performs well, which is in line with what \citet{ps_SL} have shown about the recovery of unbiasedness with ML tools for the outcome model when dealing with a wrong propensity score. 
 
-However this figure shows an unusual result for the model that had a wrong logistic outcome model, paired with a forest propensity score;  whereas when the misspecification of the outcome model is through a forest, the bias still performs well (its brown line on the graph is overlapped with the grey line). This makes us wonder if a forest on the propensity is not strong enough to recover the parametric misspecification of the outcome model.\\
+However these figures shows an unusual result for the model that had a wrong logistic outcome model, paired with a forest propensity score;  whereas when the misspecification of the outcome model is through a forest, the bias still performs well (its brown line on the graph is overlapped with the grey line). As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence is slower than $\sqrt{N}$, making this estimate inconsistent. This makes us wonder if a Random Forest on the propensity is not strong enough to recover the parametric misspecification of the outcome model.
 
 \begin{figure}[h!]
     \centering
@@ -345,6 +353,7 @@ However this figure shows an unusual result for the model that had a wrong logis
     \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
     \label{figCIRF}
 \end{figure}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SERF.png}
@@ -352,9 +361,7 @@ However this figure shows an unusual result for the model that had a wrong logis
     \label{figSERF}
 \end{figure}
 
-
-
-As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the standard error at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the wrong logistic outcome model and forest propensity, this CI coverage simply converges to 0(with the standard error estimate diverging from the standard deviation in \ref{figSERF}), so we eventually don't contain the true value of the sample mean in the confidence intervals based on this specification of the DR estimator. Again, more exploration of DR estimations using a wrong parametric outcome model and a random forest propensity is needed to see why this phenomenon is happening.
+As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the standard error at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the wrong logistic outcome model and forest propensity, this CI coverage simply converges to 0 (with the standard error estimate diverging from the standard deviation in \ref{figSERF}), so we eventually don't contain the true value of the sample mean in the confidence intervals based on this specification of the DR estimator. Again, more exploration of DR estimations using a wrong parametric outcome model and a random forest propensity is needed to see why this phenomenon is happening.
 
 \begin{figure}[h!]
     \centering
@@ -363,44 +370,98 @@ As for the CI coverage results of the various DR estimations in figure \ref{figC
     \label{fighistRF}
 \end{figure}
 
+Going back to the DR estimates that were only specified with Random Forests, figure \ref{fighistRF} suggest asymptotic normality of the distribution of these estimates, like in the parametric setting. \\
+
+Overall the use of Random Forests in this data setting has resulted in consistent DR estimates (with the exception of one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the Random Forests easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and didn't account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that RFs can provide a safety cushion for model specification.
+
+\clearpage
 \subsubsection{Simulation 2: 4 features}
+
+Overall the use of Random Forests in this data setting has resulted in consistent DR estimates (with the exception of one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the Random Forests easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and didn't account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that RFs can provide a safety cushion for model specification.
+
 \begin{figure}[h!]
     \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/biasRF.png}
+    \includegraphics[width = 0.9\columnwidth]{figures/biasRF_moreW.png}
     \caption{Simulation results of bias for the various DR estimator specifications}
-    \label{figbiasRF}
+    \label{figbiasRF_moreW}
 \end{figure}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF_moreW.png}
     \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
-    \label{figsqrtnRF}
+    \label{figsqrtnRF_moreW}
 \end{figure}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/CIRF.png}
-    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
-    \label{figCIRF}
-\end{figure}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/SERF.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
-    \label{figSERF}
-\end{figure}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/histRF.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
-    \label{fighistRF}
-\end{figure}
-\subsection{Using Support Vector Machines}
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/CIRF_moreW.png}
+    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \label{figCIRF_moreW}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/SERF_moreW.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figSERF_moreW}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/histRF_moreW.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{fighistRF_moreW}
+\end{figure}
+
+\clearpage
 \subsection{Using Multi-Layer Perceptrons}
 
-This section is motivated by the publication by \citet{setoguchi-nn} suggesting that Neura Networks reduce the bias of propensity scores compared to logistic regression.
+This section is motivated by the publication by \citet{setoguchi-nn} suggesting that Neural Networks reduce the bias of propensity scores compared to logistic regression.
+
+\subsubsection{Simulation 1: 2 features}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/biasRF_moreW.png}
+    \caption{Simulation results of bias for the various DR estimator specifications}
+    \label{figbiasRF_moreW}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF_moreW.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figsqrtnRF_moreW}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/CIRF_moreW.png}
+    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \label{figCIRF_moreW}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/SERF_moreW.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figSERF_moreW}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/histRF_moreW.png}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{fighistRF_moreW}
+\end{figure}
+
+\clearpage
+\subsubsection{Simulation 2: 4 features}
+
 \subsection{Comparison of the three methods}
 
+\clearpage
 \section{Discussion}
 
 \section{Conclusion}
