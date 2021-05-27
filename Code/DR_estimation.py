@@ -27,7 +27,7 @@ def RF_crossval(Xtrain, ytrain, Xtest,):
     
     # Choose the values of the number of decision trees, their depth and 
     # the maximum number of descriptors (features) randomly chosen at each split that I want to test out with GridSearchCV
-    n_estimators = np.arange(100,4000,200)
+    n_estimators = np.arange(600,1001,200)
     max_depth = np.arange(10,31,5)
     max_features = np.arange(1,int(Xtrain.shape[1])+1,1)
     
