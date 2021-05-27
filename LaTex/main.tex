@@ -303,12 +303,7 @@ Alternatively, one can use Machine Learning models to try to alleviate this bias
 Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. However, these methods may not have quantifiable theoretical guarantees. In the following sections we will take a closer look at the use of Random Forests and Multi-layer Perceptron \todo{and maybe SVMs if it finishes running} with various data settings, and see if these data adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
 
 \subsection{Using Random Forests}
-\begin{figure}
-    \centering
-    \includegraphics{}
-    \caption{Caption}
-    \label{fig:my_label}
-\end{figure}
+
 Random forests are a beginner friendly Machine Learning tool that create a classification or regression model based on multiple randomly generated decision trees that are combined together to make a better prediction than that of a single decision tree. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also comfortable working with a mix of continuous and categorical features. However it is not the most time efficient tool, as the training of the models requires a non-negligible amount of computational power. In this section we will explore the use of Random Forests for fitting the nuisance parameters in DR estimation.
 
 
