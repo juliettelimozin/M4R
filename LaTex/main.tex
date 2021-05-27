@@ -246,49 +246,51 @@ For calculating the confidence intervals, we set the model-based sample error es
 \begin{align*}
     \hat{SE} = n^{-1} \sqrt{\sum_{i=1}^n \left(\frac{R_i(Y_i - m(\mathbf{W}_i))}{\pi(\mathbf{W}_i)} + m(\mathbf{W}_i) - \hat{\beta}_{DR}\right)^2}
 \end{align*}
-from \citet{lunceford_davidian}.
-
-\begin{itemize}
-    \item Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $\sqrt{N}$. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
-    \item Figure \ref{figCIpara} shows the empirical coverage of the 95\% confidence intervals of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the standard error was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter are either too high or too low.
-    \item Figure \ref{figSEpara} confirms the statement above, as we see the ratio of the standard deviation of the DR estimates to the average standard error estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the confidence interval bounds. As for the DR estimations with one wrong model, this ratio is above or below 1, suggesting that the standard error estimation is on average too low or too high, hence giving a CI coverage that is too low or too high for these cases as the calculations of the CI bounds are inaccurate.
-    \item Figure \ref{fighistpara} suggests that we indeed see asymptotic normality of the distribution, centered at the true mean, of the DR estimators that have at least one correctly specified nuisance parameter
-\end{itemize}
+from \citet{lunceford_davidian}. \\
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biaspara.png}
-    \caption{Simulation results of bias for the various DR estimator specifications}
+    \caption{Simulation results of bias for the various parametric DR estimator specifications}
     \label{figbiaspara}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnpara.png}
-    \caption{Simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \caption{Simulation results of $\sqrt{N}$bias for the various parametric DR estimator specifications}
     \label{figsqrtnpara}
 \end{figure}
+
+Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $\sqrt{N}$. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIpara.png}
-    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \caption{Simulation results of 95\% confidence intervals coverage for the various parametric DR estimator specifications}
     \label{figCIpara}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SEpara.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various parametric DR estimator specifications}
     \label{figSEpara}
 \end{figure}
+
+Figure \ref{figCIpara} shows the empirical coverage of the 95\% confidence intervals of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the standard error was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter are either too high or too low.
+
+Figure \ref{figSEpara} confirms the statement above, as we see the ratio of the standard deviation of the DR estimates to the average standard error estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the confidence interval bounds. As for the DR estimations with one wrong model, this ratio is above or below 1, suggesting that the standard error estimation is on average too low or too high, hence giving a CI coverage that is too low or too high for these cases as the calculations of the CI bounds are inaccurate.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histpara.png}
-    \caption{Histogram of simulation results for  sample size $N = 2000$}
+    \caption{Histograms of parametric DR estimators from simulation results for sample size $N = 2000$}
     \label{fighistpara}
 \end{figure}
+
+Figure \ref{fighistpara} suggests that we indeed see asymptotic normality of the distribution, centered at the true mean, of the DR estimators that have at least one correctly specified nuisance parameter.\\
+
 Although these results suggest that the parametric approach for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data-generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
 
 \clearpage
@@ -306,6 +308,12 @@ Some data adaptive methods include: random forests, support vector machines, ker
 
 Random forests are a beginner friendly Machine Learning tool that create a classification or regression model based on multiple randomly generated decision trees that are combined together to make a better prediction than that of a single decision tree. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also comfortable working with a mix of continuous and categorical features. However it is not the most time efficient tool, as the training of the models requires a non-negligible amount of computational power. In this section we will explore the use of Random Forests for fitting the nuisance parameters in DR estimation.
 
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.7\columnwidth]{figures/tree.png}
+    \caption{Illustration of a Random Forest (source: analyticsvidhya.com)}
+    \label{fig:my_label}
+\end{figure}
 
 \todo[inline]{More explanation on RF}
 
@@ -348,14 +356,14 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasRF.png}
-    \caption{Simulation results of bias for the various DR estimator specifications}
+    \caption{Random Forest simulation 1 results of bias for the various DR estimator specifications}
     \label{figbiasRF}
 \end{figure}
 
 \begin{figure} 
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{Random Forest simulation 1 results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnRF}
 \end{figure}
 
@@ -365,32 +373,32 @@ We also notice that when the outcome model was a forest and the propensity was w
 
 However these figures show an unusual result for the model that had a wrong logistic outcome model, paired with a forest propensity score;  whereas when the misspecification of the outcome model is through a forest, the bias still performs well (its brown line on the graph is overlapped with the grey line). As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence to 0 is slower than $N^{-1/2}$, making this estimate inconsistent. This makes us wonder if a Random Forest on the propensity is not strong enough to recover the parametric misspecification of the outcome model.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/CIRF.png}
-    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
-    \label{figCIRF}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/SERF.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
-    \label{figSERF}
-\end{figure}
-
 As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the standard error at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the wrong logistic outcome model and forest propensity, this CI coverage simply converges to 0 (with the standard error estimate diverging from the standard deviation in \ref{figSERF}), so we eventually don't contain the true value of the sample mean in the confidence intervals based on this specification of the DR estimator. Again, more exploration of DR estimations using a wrong parametric outcome model and a random forest propensity is needed to see why this phenomenon is happening.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width = 0.9\columnwidth]{figures/histRF.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
-    \label{fighistRF}
+    \includegraphics[width = 0.9\columnwidth]{figures/CIRF.png}
+    \caption{Random Forest simulation 1 results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \label{figCIRF}
 \end{figure}
 
 Going back to the DR estimates that were only specified with Random Forests, figure \ref{fighistRF} suggest asymptotic normality of the distribution of these estimates, like in the parametric setting. \\
 
 Overall the use of Random Forests in this data setting has resulted in consistent DR estimates (with the exception of one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the Random Forests easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and didn't account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that RFs can provide a safety cushion for model specification.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/SERF.png}
+    \caption{Random Forest simulation 1's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \label{figSERF}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.9\columnwidth]{figures/histRF.png}
+    \caption{Random Forest simulation 1's histograms of DR estimates for sample size $N = 1000$}
+    \label{fighistRF}
+\end{figure}
 
 \clearpage
 \subsubsection{RF simulation 2: 4 features}
@@ -414,14 +422,14 @@ Unlike the simulation with 2 features, this time with the addition of 2 new feat
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasRF_moreW.png}
-    \caption{Simulation results of bias for the various DR estimator specifications using Random Forest and extra features}
+    \caption{Random Forest simulation 2 results of bias for the various DR estimator specifications}
     \label{figbiasRF_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF_moreW.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{Random Forest simulation 2 results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnRF_moreW}
 \end{figure}
 
@@ -430,23 +438,23 @@ Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figu
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIRF_moreW.png}
-    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \caption{Random Forest simulation 2 results of 95\% confidence intervals coverage for the various DR estimator specifications}
     \label{figCIRF_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SERF_moreW.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{Random Forest simulation 2's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSERF_moreW}
 \end{figure}
 
-It is with no surprise that due to the slowness of the convergences, a normal distribution centered at the true mean hasn't been achieved for the largest sample size considered in the simulation, as seen in figure \ref{fighistRF_moreW}, in particular for the DR estimators involving forests only. 
+It is with no surprise that due to the slowness of the convergences, a normal distribution centered at the true mean hasn't been achieved for the largest sample size considered in the simulation, as seen in figure \ref{fighistRF_moreW}, in particular for the DR estimators involving forests only. \\
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histRF_moreW.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{Random Forest simulation 2's histograms of DR estimates for sample size $N = 1200$}
     \label{fighistRF_moreW}
 \end{figure}
 
@@ -504,49 +512,64 @@ Like with Random Forests, the MLPs also go through a 5-fold cross-validation pro
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasMLP.png}
-    \caption{Simulation results of bias for the various DR estimator specifications}
+    \caption{MLP simulation 1 results of bias for the various DR estimator specifications}
     \label{figbiasMLP}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnMLP.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{MLP simulation 1 results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnMLP}
 \end{figure}
 
-In figure \ref{figbiasMLP} we notice that all estimates involving at least one MLP nuisance parameters have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score, and it outperforms the estimate with logistic propensity score. This goes in line with the findings of \citet{setoguchi-nn} about an MLP propensity score having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameters performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with wrong logistic outcome model and MLP propensity score (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with wrong logistic outcome model and propensity MLP shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with wrong logistic propensity score and MLP outcome model (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with wrong MLP propensity and MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
+In figure \ref{figbiasMLP} we notice that all estimates involving at least one MLP nuisance parameters have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score, and it outperforms the estimate with logistic propensity score. This goes in line with the findings of \citet{setoguchi-nn} about an MLP propensity score having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameters performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with wrong logistic outcome model and MLP propensity score (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with wrong logistic outcome model and propensity MLP shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with wrong logistic propensity score and MLP outcome model, \texttt{DR wrong logistic ps, MLP om} (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with wrong MLP propensity and MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIMLP.png}
-    \caption{Simulation results of 95\% confidence intervals coverage for the various DR estimator specifications}
+    \caption{MLP simulation 1 results of 95\% confidence intervals coverage for the various DR estimator specifications}
     \label{figCIMLP}
 \end{figure}
+
+The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR wrong MLP om, MLP ps} and \texttt{DR wrong MLP ps \& om} (in blue, orange pink and grey) have CI coverages tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest to be tending towards the true value. On the other hand, we see a U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR wrong MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score is actually providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR wrong logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SEMLP.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{MLP simulation 1's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSEMLP}
 \end{figure}
-
-The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR wrong MLP om, MLP ps} \texttt{DR (in blue, orange and pink) have CI coverages tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. The DR estimate struggling to get up to high CI coverage the most here is again the one with a MLP outcome model and wrong logistic propensity score. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histMLP.png}
-    \caption{Accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{MLP simulation 1's histograms of DR estimates for sample size $N = 1200$}
     \label{fighistMLP}
 \end{figure}
 
+Taking a particular look at the histograms of the DR estimates involving only MLPs for the largest sample size considered, we notice that although \texttt{DR MLP} and \texttt{DR wrong MLP om, MLP ps} have distributions almost centered at the true mean, we know from the diverging trend of their CI coverage at larger samples that these histogram will be less and less centered at the true mean as we increase sample size, so we wouldn't expect asymptotic normality from these. On the other hand, from the way the bias and CI coverage of \texttt{DR wrong MLP ps \& om} and \texttt{DR wrong MLP ps, MLP om} were converging, we are likely to get asymptotic normal distribution from these estimates, although at a slower rate than the parametric setting. Since \texttt{DR wrong MLP ps \& om} had higher bias, its histogram in figure \ref{fighistMLP} is less centered at the true value than that of \texttt{DR wrong MLP ps, MLP om} at the given sample size. One would expect to see better centering of these histogram, had a larger sample size been considered.
 \clearpage
 \subsubsection{Simulation 2: 4 features}
 
 \todo[inline]{to be added once results come back}
 
+\clearpage
 \subsection{Comparison of the three methods}
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/biascompare.png}
+    \caption{Comparing bias performance on simulation with 2 features}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 0.8\columnwidth]{figures/sqrtncompare.png}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
 \clearpage
 \section{Discussion}
 
