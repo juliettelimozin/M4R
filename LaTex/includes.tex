@@ -32,6 +32,7 @@
 \usepackage{backref} % needed for citations
 \usepackage{array}
 \usepackage{latexsym}
+\usepackage{listings}
 \usepackage[pdftex,pagebackref,hypertexnames=false,colorlinks]{hyperref} % provide links in pdf
 
 \hypersetup{pdftitle={},
@@ -100,5 +101,18 @@
     \Huge \bfseries  #1\par\nobreak
     \vskip 30\p@
   }}
-
+\lstset{
+language = Python,
+basicstyle = \ttfamily,
+breaklines = true
+aboveskip = {1.0\baselineskip},
+belowskip = {1.0\baselineskip},
+prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+frame = lines,
+numbers = left,
+numberstyle = \small,
+keywordstyle = \color[rgb]{1,0,0},
+commentstyle = \color[rgb]{0.1,0.8,0.3},
+stringstyle = \color[rgb]{0,0,1}
+}
 \allowdisplaybreaks

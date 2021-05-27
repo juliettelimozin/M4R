@@ -515,6 +515,8 @@ Like with Random Forests, the MLPs also go through a 5-fold cross-validation pro
     \label{figsqrtnMLP}
 \end{figure}
 
+In figure \ref{figbiasMLP} we notice that all estimates involving at least one MLP nuisance parameters have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score. This goes in line with the findings of \citet{setoguchi-nn}. The DR estimate set with correct MLPs for both nuisance parameters performs well in terms of bias as well. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ as shown by the downward trend of the $\sqrt{N}$bias curves, given the sample sizes considered in this simulation. The DR estimator with wrong logistic propensity score and MLP outcome model (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification.
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIMLP.png}
@@ -529,6 +531,8 @@ Like with Random Forests, the MLPs also go through a 5-fold cross-validation pro
     \label{figSEMLP}
 \end{figure}
 
+The estimates also generally have CI coverages tending to the 95\% as seen in figure \ref{figCIMLP}, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. The DR estimate struggling to get up to high CI coverage the most here is again the one with a MLP outcome model and wrong logistic propensity score. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histMLP.png}
@@ -539,6 +543,8 @@ Like with Random Forests, the MLPs also go through a 5-fold cross-validation pro
 \clearpage
 \subsubsection{Simulation 2: 4 features}
 
+\todo[inline]{to be added once results come back}
+
 \subsection{Comparison of the three methods}
 
 \clearpage
@@ -546,7 +552,13 @@ Like with Random Forests, the MLPs also go through a 5-fold cross-validation pro
 
 \section{Conclusion}
 
+\clearpage
 \section{Appendix}
+
+\subsection*{Code for DR simulation}
+
+\lstinputlisting[language=Python]{Code/DR_estimation.py}
+
 %% bibliography
 \clearpage
 \bibliographystyle{unsrtnat}
