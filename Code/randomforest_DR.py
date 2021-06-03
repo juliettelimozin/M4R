@@ -47,15 +47,15 @@ for i in range(9):
                                                              axis = 0)
 
 
-labels = ['DR logistic ps, forest om',
-          'DR logistic om, forest ps',
-          'DR forest',
-          'DR wrong logistic om, forest ps',
-          'DR wrong loigstic ps, forest om',
-          'DR wrong forest om, forest ps',
-          'DR wrong forest ps, forest om',
-          'DR wrong forest ps & om',
-          'DR exact']
+labels = ['DR logistic ps, RF om',
+          'DR logistic om, RF ps',
+          'DR RF',
+          'DR mis. logistic om, RF ps',
+          'DR mis. logistic ps, RF om',
+          'DR mis. RF om, RF ps',
+          'DR mis. RF ps, RF om',
+          'DR mis. RF ps & om',
+          'DR exact spec.']
 
 plt.figure(figsize = (10,6.6))
 for i in range(9):
@@ -136,6 +136,6 @@ ax[1,0].set_ylabel('Count', fontsize = 15)
 ax[1,0].vlines(B_true, 0, 120,label = 'True mean')
 
 fig.legend()
-fig.suptitle(r'Histograms of estimates for sample size $N = 1000$', fontsize = 15)
+fig.suptitle(r'Histograms of estimates for sample size $N = $' + str(N[-1]), fontsize = 15)
 plt.savefig('../figures/histRF.png')
 plt.show()

@@ -50,12 +50,12 @@ for i in range(9):
 labels = ['DR logistic ps, MLP om',
           'DR logistic om, MLP ps',
           'DR MLP',
-          'DR wrong logistic om, MLP ps',
-          'DR wrong loigstic ps, MLP om',
-          'DR wrong MLP om, MLP ps',
-          'DR wrong MLP ps, MLP om',
-          'DR wrong MLP ps & om',
-          'DR exact']
+          'DR mis. logistic om, MLP ps',
+          'DR mis. logistic ps, MLP om',
+          'DR mis. MLP om, MLP ps',
+          'DR mis. MLP ps, MLP om',
+          'DR mis. MLP ps & om',
+          'DR exact spec.']
 
 plt.figure(figsize = (10,6.6))
 for i in range(9):
