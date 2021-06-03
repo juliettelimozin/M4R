@@ -69,8 +69,8 @@ for i in range(9):
 plt.hlines(0.95, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size', fontsize =15)
 plt.ylabel('Coverage', fontsize = 15)
-plt.savefig('../figures/CIRF_moreW.png')
 plt.legend()
+plt.savefig('../figures/CIRF_moreW.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
