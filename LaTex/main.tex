@@ -39,12 +39,12 @@
 \setlength{\parindent}{5ex}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-Your abstract.cddvfvfbb
+\todo[inline]{to do once I have all results}
 
 
 \end{abstract}
 
-\cleardoublepage
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Acknowledgments}
 I would like to thank my project supervisor, Dr David Whitney, for his continued guidance and support throughout this project. Our weekly meetings have always been a pleasure, and his advice on postgraduate studies have also been of immense help. 
@@ -60,7 +60,7 @@ Last but not least, I would like to thank my various statistics lecturers who, i
 \tableofcontents 
 
 
-\clearpage{\pagestyle{empty}\cleardoublepage}
+\clearpage
 \pagenumbering{arabic}
 \setcounter{page}{1}
 \fancyhead[L]{\textsl{\leftmark}}
@@ -68,16 +68,16 @@ Last but not least, I would like to thank my various statistics lecturers who, i
 \setcitestyle{authoryear,open={(},close={)}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction} 
-\todo[inline]{Finish introduction}
 
-- Clinical trials often have reserve patients because the trial patients might drop out for x and y reason
+Missing data is a common issue encountered in Statistics, and can have a significant effect on statistical inferences one may draw from the data. Suppose one wishes to estimate the mean outcome value of a data set that has some missing outcome values. One way to approach this issue is to simply discard the data points that do not have an outcome value accounted for, but that would be a loss of valuable feature information we still have of these data points, and this estimation would likely be biased.
 
-- often the calculation of the mean outcome of the trial is needed, but what do we do with the patients we don't have an outcome for?
+Many bias-minimising strategies exist for estimating the mean outcome value. The most efficient method consists of fitting predictive models of the outcome and 'missingness' pattern, and use the fitted values as part of the outcome mean calculation. Such a way of estimating the outcome mean is called the augmented inverse probability weighting (AIPW) approach, often referred to as doubly-robust (DR) estimation. This approach has been popularised in many fields, as it provides the user two chances of maintaining consistency, as only one of the two predictive models needs to be correctly specified. The art of specifying these models, however, is the biggest challenge one has to face when using DR estimation. We wish to consider models that are not only accurate but also provide a DR estimate whose bias converges to 0 at a rate faster than that of $N^{-1/2}$, which is generally the rate of convergence to the true value that we aim for in statistical literature.
 
-- in this report we will cover the Doubly-Robust mean estimation method combined with machine learning tools that will help generate a consistent estimation of the mean thanks to easy to use computational tools
+Traditionally, parametric models are used to predict the outcome and the probability of observing the outcome given the feature data (referred to as propensity score). As parametric models form a family of probability distributions, their parameter range is finite and they provide useful theoretical backings such as the ability to infer on asymptotic distributions and confidence intervals (CIs). However a slight misspecification can lead to biased estimates. In recent years, developments in data-adaptive non-parametric tools make one consider these Machine Learning (ML) approaches, and whether or not they are more efficient at fitting the predictive models correctly even with a slight misspecification, which would benefit DR estimation.
+ 
+In this report we will illustrate the use of DR estimation, starting with a parametric setting that includes DR estimates with one or more misspecified models. We will then move towards flexible nonparametric methods, notably Random Forests (RFs) and Multilayer Perceptrons (MLPs), to see if they provide improved inference while still maintaining consistent estimation.
 
-- Hopefully this report can be useful to upcoming clinical trials in making them understand how the machine learning models can be use to improve mean estimation from missing data
-
+\clearpage 
 \section{Setting} 
 
 Suppose we have a data set of size $n$, and realisations of random vector $(\mathbf{Y}, \mathbf{W}, \mathbf{R})$ where $\mathbf{Y}$ denotes a partially denoted outcome, i.e. $Y_i$ is missing for individual $i$'s unobserved outcome. $\mathbf{W}$ denotes the auxiliary variables, and $\mathbf{R}$ is an indicator on whether the $i$th individual's outcome is missing or not; that is, if $R_i = 1$, the outcome is observed, whereas $R_i = 0$ would indicate that the outcome is missing.
@@ -88,37 +88,36 @@ To summarise:
     \item $\mathbf{R}$: indicator on whether $Y$ is observed or not ($R = 1$: observed, $R = 0$: missing) 
 \end{itemize}
 
-A data set is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}, i.e $P(R=r|\mathbf{W}, Y) = P(R= r|\mathbf{W})$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y|\mathbf{W})$. So in the example of a clinical trial, we would consider the data set obtained from the study to be MAR if given the measurements taken from the patients, the reasons why some patients dropped out were unrelated to the outcome of the trial. The MAR setting will therefore have effects on any causal inference we may perform on this data set.
+The outcome is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}, i.e $P(R=r|\mathbf{W}, Y) = P(R= r|\mathbf{W})$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y|\mathbf{W})$. So in the example of a clinical trial, we would consider the data set obtained from the study to be MAR if given the measurements taken from the patients, the reasons why some patients dropped out were unrelated to the outcome of the trial. The MAR setting will therefore have effects on any statistical inference we may perform on this data set.
 
 When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}.\\
 
-We make the assumption that $(W_1, Y_1, R_1),...,(W_n, Y_n, R_n)$ are independent and identically distributed for the rest of the report. We also assume that $R$ is independent of $Y$ given W so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR (\citeauthor{vansteelandt}), where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
+We make the assumption that $(\mathbf{W}_1, Y_1, R_1),...,(\mathbf{W}_n, Y_n, R_n)$ are independent and identically distributed for the rest of the report. We also assume that $R$ is independent of $Y$ given $\mathbf{W}$ so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR \citep{vansteelandt}, where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
 
-\section{Inverse probability weighting and doubly robust estimators}
+\clearpage
+\section{Non-robust and doubly-robust estimators}
 
 \subsection{Inverse Probability Weighting approach}
 
 Suppose we wish to calculate or estimate the outcome mean $\beta = E(\mathbf{Y})$. A problem occurs when trying to compute it as $\mathbf{Y}$ is only partially observed, so calculating a mean with only the observed outcomes would not be a good representation of the data outcome as a whole.
 
-One solution to this problem is the Inverse Probability Weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the probability that the $i$th individual is observed given the set of variables for this outcome, $\mathbf{W}_i$ (\citeauthor{vansteelandt}). We denote this weight by
+One solution to this problem is the inverse probability weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the propensity score, denoted by
 \begin{align*}
     \pi(\mathbf{W})= E(R|\mathbf{W}) = P(R = 1|\mathbf{W}).
 \end{align*}
 
-We assume that the weighting is positive for any $\mathbf{W}_i$.
+We assume that the weighting is bounded away from 0 almost for any $\mathbf{W}_i$.
 
 The IPW estimator of the mean $\beta$ is then simply 
 \begin{equation} \label{IPW_est}
     \hat{\beta}_{IPW} = \frac{1}{n} \sum_{i=1}^{n} \frac{R_iY_i}{\pi(\mathbf{W}_i)}.
 \end{equation}
 
-As $\pi(\mathbf{W})$ is unknown as the data is missing at random, we propose a propensity model, most commonly a parametric model $\pi(\mathbf{W}; \boldsymbol\alpha)$ for the missingness pattern and we build and estimator $\hat{\boldsymbol\alpha}$ of $\boldsymbol\alpha$ from the data (\citeauthor{vansteelandt}).
+In practice, the propensity score $\pi(\mathbf{W})$ is unknown, so we predict the probabilities using, most commonly, a parametric model $\hat\pi(\mathbf{W}; \boldsymbol\alpha)$ for the missingness pattern and we build an estimator $\hat{\boldsymbol\alpha}$ of $\boldsymbol\alpha$ from the data \citep{vansteelandt}.
 
-The IPW estimator is consistent for $\beta$ if the propensity model $\pi(\mathbf{W}; \boldsymbol\alpha)$ is correctly specified \citep{davidian}. 
+If the propensity score model $\hat\pi(\mathbf{W}; \boldsymbol\alpha)$ is correctly specified, by the weak law of large numbers (WLLN), $\hat{\beta}_{IPW}$ will converge in probability to the true mean $\beta$, so this makes the IPW estimate consistent for $\beta$ \citep{davidian}. Using the Central Limit Theorem (CLT), we have $\sqrt{n}(\hat{\beta}_{IPW}-\beta) \xrightarrow{d} N(0,\sigma^2)$ where $\sigma$ is the estimated outcome variance (often a sample-based estimator in practice), so we can use this result to perform inference tests and confidence intervals for the true mean.
 
-If the propensity model $\pi(\mathbf{W})$ is correctly specified, then by the weak law of large numbers (WLLN), $\hat{\beta}_{IPW}$ will converges in probability to the true mean $\beta$, so this makes the IPW estimate consistent for $\beta$. Using the Central Limit Theorem (CLT), we have $\sqrt{n}(\hat{\beta}_{IPW}-\beta) \xrightarrow{d} N(0,\sigma_1^2)$ where $\sigma$ is the estimated outcome variance, so we can use this result to perform inference tests and confidence intervals for the true mean.
-
-A quick drawback from the IPW estimator in \ref{IPW_est} is that it is usually difficult to construct at propensity model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size $n$ is large enough, so a removal of bias is not guaranteed by the IPW estimator when he model is misspecified. Another problem that arises is unstable weights: if the model is misspecified, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a select few, so the IPW estimator is mainly dominated by these large weights \citep{seaman}.
+A drawback from the IPW estimator in equation \ref{IPW_est} is that it is usually difficult to construct a propensity score model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size $n$ is large enough, so a removal of bias is not guaranteed by the IPW estimator when the model is misspecified. Another problem that arises is unstable weights: if the model is misspecified, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a select few, so the IPW estimator is mainly dominated by these large weights \citep{seaman}.
 
 \citet{kang} suggest that the model being misspecified is more likely the cause of large weights, rather than if the auxiliary variables are truly predictive of whether the outcome may be missing or not. There exist a few tests, including the \citet{hosmer} test, to detect poor fit of the propensity model.\\
 
@@ -126,7 +125,7 @@ A quick drawback from the IPW estimator in \ref{IPW_est} is that it is usually d
 
 Alternatively, one could make use of the conditional expectation of the outcome 
 \begin{align*}
-    m(\mathbf{W}) = E(Y|\mathbf{W})
+    m(\mathbf{W}) = E(Y|R= 1,\mathbf{W})
 \end{align*}
 to have a different estimator of the mean \citep{davidian,vansteelandt}, sometimes called the regression imputation estimator: 
 
@@ -134,67 +133,68 @@ to have a different estimator of the mean \citep{davidian,vansteelandt}, sometim
     \hat{\beta}_ {RI} = \frac{1}{n}\sum_{i = 1}^n m(\mathbf{W}_i)
 \end{equation}
 
-Because again the true value of $m(\mathbf{W})$ is unknown, we propose an outcome model, most commonly a parametric model $m(\mathbf{W}, \gamma)$ with some parameter $\gamma$, and again we build an estimator $\hat{\gamma}$ for $\gamma$ from the sample data. Again, like in IPW, the efficiency of the the RI estimator relies on the correct specification of the outcome model, as then the WLLN would apply and so the RI estimator would be consistent for $\beta$. \\
+In practice the true value of $m(\mathbf{W})$ is unknown, we propose an outcome model, most commonly a parametric model $\hat m(\mathbf{W}, \gamma)$ with some parameter $\gamma$, and again we build an estimator $\hat{\gamma}$ for $\gamma$ from the sample data. Like in IPW, the efficiency of the RI estimator in terms of consistency relies on the correct specification of the outcome model, as then the WLLN would apply and so the RI estimator would be consistent for $\beta$. \\
 
 \subsection{Augmented IPW approach} 
 
-However this motivates the idea behind the augmented IPW estimator. One could think of combining the ideas from the IPW and RI estimators. From \citet{davidian}, estimators of $\beta$, when the propensity model is correctly specified and the estimators are consistent and are asymptotically normal(i.e. CLT holds), are equivalent to 
+The estimation strategies from the previous sections motivate the idea behind the AIPW estimator. One could think of combining the ideas from the IPW and RI estimators. From \citet{davidian}, IPW estimators of $\beta$, when the propensity score model is correctly specified and the estimators are consistent and are asymptotically normal (i.e. CLT holds), are equivalent to 
 
 \begin{equation}
-    \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} - \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) h(\mathbf{W}_i)
+    \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\hat\pi(\mathbf{W}_i, \hat{\alpha})} - \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) h(\mathbf{W}_i)
 \end{equation}
 
-This is called an augmented IPW as it is the sum of the IPW estimator and an augmentation term depending on $h(\mathbf{W})$ \citep{davidian}. By taking $-h(\mathbf{W}) = m(\mathbf{W}, \hat{\gamma})$ like in the RI approach, we have a new estimator
+This is called an AIPW as it is the sum of the IPW estimator and an augmentation term depending on $h(\mathbf{W})$ \citep{davidian}. By taking $-h(\mathbf{W}) = \hat m(\mathbf{W}, \hat{\gamma})$ like in the RI approach, we have a new estimator
 \begin{equation}
-    \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma)
+    \hat\beta_{DR} = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\hat \pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) \hat m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
-$\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{doubly-robust estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome ans missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{bangrobins,vansteelandt}.
+The estimator $\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{DR estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome ans missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{bangrobins,vansteelandt}.
 
 For example, doubly-robust estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations on patients to compute a DR estimation of the mean. \\
 
-The proof of the doubly-robustness of this mean estimation is as follows, mainly taken from \citet{vansteelandt}.
+The proof of the double-robustness of this mean estimator is as follows, mainly taken from \citet{vansteelandt}.
 
-Rewriting $\hat{\beta}_{DR}$, we use the WLLN to get
+Rewriting $\hat{\beta}_{DR}$, we have
 \begin{align*}
-    \hat{\beta}_{DR} & = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) m(\mathbf{W}_i, \hat\gamma) \\
-    & = \frac{1}{n}\sum_{i=1}^{n} Y_i + \frac{1}{n}\sum_{i=1}^{n}\left(1 - \frac{R_i}{\pi(\mathbf{W_i},\hat{\alpha})} \right) (m(\mathbf{W}_i, \hat\gamma)-Y_i) \\
-    & \xrightarrow{p} E(Y_1) + E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right] \text{ (WLLN)} \\
-    & \phantom{\xrightarrow{p} E(Y_1)} = \beta + E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right]
+    \hat{\beta}_{DR} & = \frac{1}{n}\sum_{i=1}^{n}\frac{R_iY_i}{\hat\pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{n}\sum_{i=1}^{n} \left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) \hat m(\mathbf{W}_i, \hat\gamma) \\
+    & = \frac{1}{n}\sum_{i=1}^{n} Y_i + \frac{1}{n}\sum_{i=1}^{n}\left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) (\hat m(\mathbf{W}_i, \hat\gamma)-Y_i)
 \end{align*}
 
-So the DR estimator is a consistent estimator for the true mean $\beta$ if the expectation added to $\beta$ above is equal to 0. \\
+Using the WLLN, we have $\frac{1}{n}\sum_{i=1}^{n} Y_i\xrightarrow{p} E(Y_1) = \beta$. Hence the DR estimator is consistent for the true mean $\beta$ if the sum added to $\frac{1}{n}\sum_{i=1}^{n} Y_i$ converges in probability to 0. \\
 
-\textbf{Case 1:} Suppose the propensity score $\pi(\mathbf{W},\hat{\alpha})$ is correctly specified and $\hat{\alpha} \xrightarrow{p} \alpha$, therefore  $\pi(\mathbf{W},\hat{\alpha}) \xrightarrow{p} \pi(\mathbf{W}) = E(R|\mathbf{W}) = E(R|\mathbf{W}, Y)$ under MAR assumption. Then using the tower rule on expectations, we have
+\textbf{Case 1:} Suppose the propensity score $\hat\pi(\mathbf{W},\hat{\alpha})$ is correctly specified and $\hat{\alpha} \xrightarrow{p} \alpha$, therefore  $\hat\pi(\mathbf{W},\hat{\alpha}) \xrightarrow{p} \pi(\mathbf{W}) = E(R|\mathbf{W}) = E(R|\mathbf{W}, Y)$ under MAR assumption. Then using the tower rule on expectations, we have
 \begin{align*}
-     & E \left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right]  \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)|Y_1, \mathbf{W}_1\right]\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right)|Y_1, \mathbf{W}_1\right]\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{\pi(\mathbf{W_1},\hat{\alpha})} \right)\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ (m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{E(R_1|Y_1, \mathbf{W}_1)} \right)\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = 0
+& \frac{1}{n}\sum_{i=1}^{n}\left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) (\hat m(\mathbf{W}_i, \hat\gamma)-Y_i) \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} \xrightarrow{p} E \left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1})} \right) (\hat m(\mathbf{W}_1, \hat\gamma)-Y_1)\right]  \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1})} \right) (\hat m(\mathbf{W}_1, \hat\gamma)-Y_1)|Y_1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[ (\hat m(\mathbf{W}_1, \hat\gamma)-Y_1)E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1})} \right)|Y_1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[ (\hat m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{\pi(\mathbf{W_1})} \right)\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[ (\hat m(\mathbf{W}_1, \hat\gamma)-Y_1)\left(1 - \frac{E(R_1|Y_1, \mathbf{W}_1)}{E(R_1|Y_1, \mathbf{W}_1)} \right)\right] \\
+     &  \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = 0
 \end{align*}
 Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$. \\
 
-\textbf{Case 2:} Suppose the outcome model $m(\mathbf{W}, \hat\gamma)$ is correctly specified and $\hat{\gamma} \xrightarrow{p} \gamma$, therefore  $m(\mathbf{W}, \hat\gamma) \xrightarrow{p} m(\mathbf{W}) = E(Y|\mathbf{W}) = E(Y|\mathbf{W}, R)$ under MAR assumption. Then a similar manner to case 1, we have
+\textbf{Case 2:} Suppose the outcome model $\hat m(\mathbf{W}, \hat\gamma)$ is correctly specified and $\hat{\gamma} \xrightarrow{p} \gamma$, therefore  $\hat m(\mathbf{W}, \hat\gamma) \xrightarrow{p} m(\mathbf{W}) = E(Y|R = 1,\mathbf{W})$ under MAR assumption. Then in a similar manner to case 1, we have
 \begin{align*}
-     & E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-Y_1)\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[ E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right)(m(\mathbf{W}_1, \hat\gamma)-Y_1)|R_1, \mathbf{W}_1\right]\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) E\left[(m(\mathbf{W}_1, \hat\gamma)-Y_1)|R_1, \mathbf{W}_1\right]\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1, \hat\gamma)-E\left[Y_1|R_1, \mathbf{W}_1\right])\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = E\left[\left(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})} \right) (E\left[Y_1|R_1, \mathbf{W}_1\right])-E\left[Y_1|R_1, \mathbf{W}_1\right])\right] \\
-     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1},\hat{\alpha})})} = 0
+& \frac{1}{n}\sum_{i=1}^{n}\left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) (\hat m(\mathbf{W}_i, \hat\gamma)-Y_i) \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} \xrightarrow{p} E\left[\left(1 - \frac{R_1}{\hat\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1)-Y_1)\right]  \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[ E\left[\left(1 - \frac{R_1}{\hat\pi(\mathbf{W_1},\hat{\alpha})} \right)(m(\mathbf{W}_1)-Y_1)|R_1 = 1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[\left(1 - \frac{R_1}{\hat\pi(\mathbf{W_1},\hat{\alpha})} \right) E\left[(m(\mathbf{W}_1)-Y_1)|R_1 = 1, \mathbf{W}_1\right]\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[\left(1 - \frac{R_1}{\hat\pi(\mathbf{W_1},\hat{\alpha})} \right) (m(\mathbf{W}_1)-E\left[Y_1|R_1 = 1, \mathbf{W}_1\right])\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = E\left[\left(1 - \frac{R_1}{\hat\pi(\mathbf{W_1},\hat{\alpha})} \right) (E\left[Y_1|R_1=1, \mathbf{W}_1\right]-E\left[Y_1|R_1=1, \mathbf{W}_1\right])\right] \\
+     & \phantom{E [(1 - \frac{R_1}{\pi(\mathbf{W_1})})} = 0
 \end{align*}
 Hence $\hat{\beta}_{DR} \xrightarrow{p} \beta$.\\
 
 Thus we have shown that when at least one of the two models is correctly specified, the DR estimator is consistent for the true mean. It follows naturally that if both models are correctly specified, this result still holds.
+
 \subsection{Parametric DR estimation}
 
 In standard parametric DR estimation, it is fairly common to define the propensity and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages. They also offer theoretical backing that would allow us to make statistical inference.\\
 
-Although this version of the DR estimator that these models lead to has been established as the usual estimator, \citeauthor{kang} have shown it performs poorly when either the propensity or both models are misspecified, i.e when logistic and linear regressions aren't the judicious choice of models for the data. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
+Although this version of the DR estimator that these models lead to has been established as the usual estimator, \cite{kang} have shown it performs poorly when either the propensity or both models are misspecified, i.e when logistic and linear regressions aren't the judicious choice of models for the data. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
 
-Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome (\citeauthor{vansteelandt}).
+Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome \citep{vansteelandt}.
 
 \subsection{Simulation study of parametric DR}
 \label{para_model}
@@ -209,9 +209,9 @@ The partially observed outcome has a conditional probability of occurrence
     P(Y = 1|R = r,\mathbf{W} = (w_1, w_2)) = \expit(0.2r - w_1 + 2w_1w_2)
 \end{align*}
 
-The true outcome model $m(\mathbf{W})$ is then 
+The true outcome model is then 
 \begin{align*}
-    E(Y|\mathbf{W}, R=1) &= P(Y = 1|\mathbf{W}, R= 1) \\
+    m(\mathbf{W}) = E(Y|\mathbf{W}, R=1) &= P(Y = 1|\mathbf{W}, R= 1) \\
     & = \expit(0.2 - w_1 + 2w_1w_2)
 \end{align*}
 
@@ -223,9 +223,9 @@ From there we calculated four parametric DR estimates:
     \item \texttt{DR wrong propensity score}, where the propensity model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit.
 \end{itemize}
 
-For each estimates we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the empirical coverage of the 95\% confidence intervals and accuracy of the standard error estimation from \citet{lunceford_davidian}.
+For each estimate we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the empirical coverage of the 95\% CIs and accuracy of the standard error estimation from \citet{lunceford_davidian}.
 
-To calculate the bias we must have the true expectation of $Y$, which is equal to taking the expectation of $Y$ given $R = 1$:
+By using properties of iterated expetations, we have
 
 \begin{align*}
     E(Y|R = 1) &= P(Y = 1|R = 1)\\
@@ -248,6 +248,8 @@ For calculating the confidence intervals, we set the model-based sample error es
 \end{align*}
 from \citet{lunceford_davidian}. \\
 
+\subsubsection*{Results}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biaspara.png}
@@ -262,7 +264,7 @@ from \citet{lunceford_davidian}. \\
     \label{figsqrtnpara}
 \end{figure}
 
-Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $\sqrt{N}$. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
+Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $N^{-1/2}$. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}.
 
 \begin{figure}[h!]
     \centering
@@ -278,7 +280,7 @@ Figure \ref{figbiaspara} suggests that the DR estimators are indeed consistent a
     \label{figSEpara}
 \end{figure}
 
-Figure \ref{figCIpara} shows the empirical coverage of the 95\% confidence intervals of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the standard error was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter are either too high or too low.
+Figure \ref{figCIpara} shows the empirical coverage of the 95\% CIs of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the standard error was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter are either too high or too low.
 
 Figure \ref{figSEpara} confirms the statement above, as we see the ratio of the standard deviation of the DR estimates to the average standard error estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the confidence interval bounds. As for the DR estimations with one wrong model, this ratio is above or below 1, suggesting that the standard error estimation is on average too low or too high, hence giving a CI coverage that is too low or too high for these cases as the calculations of the CI bounds are inaccurate.
 
@@ -291,7 +293,7 @@ Figure \ref{figSEpara} confirms the statement above, as we see the ratio of the 
 
 Figure \ref{fighistpara} suggests that we indeed see asymptotic normality of the distribution, centered at the true mean, of the DR estimators that have at least one correctly specified nuisance parameter.\\
 
-Although these results suggest that the parametric approach for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data-generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with.
+Although these results suggest that the parametric approach for setting the nuisance parameters is a good way of specifying these models, as shown by the consistency of the estimates, in reality we were only able to set the models correctly because we knew the distribution of the data-generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been a lot more time-consuming to find the correct specification of at least one nuisance parameter. This is where the practicality of ensemble learners from Machine Learning tools seem to be a more efficient way of setting these models, which we will cover in the next section. Nevertheless, a important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with, as well as the theoretical backing they provide.
 
 \clearpage
 \section{Machine Learning approaches to optimise the DR estimator}
@@ -302,7 +304,7 @@ But convenience is over weighed by defectiveness under model misspecification as
 
 Alternatively, one can use Machine Learning models to try to alleviate this bias, as they often provide models that are data adaptive and therefore easier to get a correctly specified model. In fact, \citet{ps_SL} have shown that when the propensity score is incorrectly specified, the use of Machine Learning tools for specifying the outcome regression can still give an unbiased DR estimator, which is an advantage over the parametric scenario, as we had seen that an incorrect propensity score with correct outcome regression was still giving the worse DR estimator in terms of bias in section \ref{para_model}.
 
-Some data adaptive methods include: random forests, support vector machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. However, these methods may not have quantifiable theoretical guarantees. In the following sections we will take a closer look at the use of Random Forests and Multi-layer Perceptron \todo{and maybe SVMs if it finishes running} with various data settings, and see if these data adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
+Some data adaptive methods include: Random Forests, Support Vector Machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. These methods have been observed to have good empirical performance, but limited theoretical results exist for them. In the following sections we will take a closer look at the use of Random Forests and Multi-layer Perceptrons \todo{and maybe SVMs if it finishes running} with various data settings, and see if these data adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
 
 \subsection{Using Random Forests}
 
@@ -319,9 +321,7 @@ Random forests are a beginner friendly Machine Learning tool that create a class
 
 \subsubsection{RF simulation 1: 2 features}
 
-\subsubsection*{Simulation framework}
-
-We use the same data generated in section \ref{para_model}, and this time we calculate DR estimators with various nuisance parameter settings that use logistic regression or random forests:
+We use the same data generated in section \ref{para_model}, and this time we calculate DR estimators with various nuisance parameter settings that use logistic regression or Random Forests:
 \begin{itemize}
     \item \texttt{DR logistic ps, forest om}: the propensity is a correctly specified logistic regression, and the outcome model is a random forest. Both model account for the interaction term between $W_1$ and $W_2$
     \item \texttt{DR logistic om, forest ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a random forest.
@@ -334,7 +334,7 @@ We use the same data generated in section \ref{para_model}, and this time we cal
     \item \texttt{DR exact}: both the propensity and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
 \end{itemize}
 
-Each time a random forest is specified, it goes through a stratified 5-fold cross validation of forest parameters in order to input the parameters that give a forest with the best accuracy on the test sets. A summary of the parameters tested by the cross-validation is provided in table \ref{}.\\
+Each time a Random Forest is specified, it goes through a stratified 5-fold cross validation of forest parameters in order to input the parameters that give a forest with the best accuracy on the test sets. A summary of the parameters tested by the cross-validation is provided in table \ref{tableRF}.\\
 \begin{table}[]
     \centering
 \begin{tabular}{ |p{3cm}|p{3cm}|p{3cm}| }
@@ -347,12 +347,14 @@ Each time a random forest is specified, it goes through a stratified 5-fold cros
  \hline 
 \end{tabular}
 \caption{Parameter grid of 5-fold cross-validation for Random Forests in simulation 1}
+\label{tableRF}
 \end{table}
 
-As before, we obtain an empirical bias by taking the sample mean of 2500 generated estimators of each sample size varying from 200 to 1200 rows. \\
+As before, we obtain an empirical bias by taking the sample mean of 2500 generated estimators of each sample size varying from 200 to 1200 rows. 
 
 \subsubsection*{Results}
 
+\todo[inline]{missing sample size N = 1200, 1400}
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasRF.png}
@@ -367,11 +369,11 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
     \label{figsqrtnRF}
 \end{figure}
 
-We notice in figure \ref{figbiasRF} that the models with random forests still provide DR estimates with bias converging to 0, even when the propensity and outcome model are set using a forest that doesn't account for the interaction term. This suggests that the forest is able to recover the misspecification, making it a useful tool in setting the nuisance parameters. Based on the sample sizes considered, figure \ref{figsqrtnRF} also suggests that theses models have biases with rate of convergence to 0 faster than $N^{-1/2}$, which further illustrates the double robustness of the estimator.
+We notice in figure \ref{figbiasRF} that the models with Random Forest still provide DR estimates that have bias converging to 0, even when the propensity and outcome model are set using a forest that doesn't account for the interaction term. This suggests that the forest is able to recover the misspecification, making it a useful tool in setting the nuisance parameters. Based on the sample sizes considered, figure \ref{figsqrtnRF} also suggests that theses models have biases with rate of convergence to 0 faster than $N^{-1/2}$, which further illustrates the double robustness of the estimator.
 
 We also notice that when the outcome model was a forest and the propensity was wrongly specified with a model that doesn't account for the interaction term, whether that was a logistic regression or a Random Forest, the bias still performs well, which is in line with what \citet{ps_SL} have shown about the recovery of unbiasedness with ML tools for the outcome model when dealing with a wrong propensity score. 
 
-However these figures show an unusual result for the model that had a wrong logistic outcome model, paired with a forest propensity score;  whereas when the misspecification of the outcome model is through a forest, the bias still performs well (its brown line on the graph is overlapped with the grey line). As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence to 0 is slower than $N^{-1/2}$, making this estimate inconsistent. This makes us wonder if a Random Forest on the propensity is not strong enough to recover the parametric misspecification of the outcome model.
+However these figures show an unusual result for the model that had a wrong logistic outcome model, paired with a forest propensity score. As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence to 0 is slower than $N^{-1/2}$, making this estimate inconsistent, whereas when the misspecification of the outcome model is through a forest, the bias still performs well (its brown line on the graph is overlapped with the grey line). This makes us wonder if a Random Forest on the propensity is not strong enough to recover the parametric misspecification of the outcome model.
 
 As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the standard error at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the wrong logistic outcome model and forest propensity, this CI coverage simply converges to 0 (with the standard error estimate diverging from the standard deviation in \ref{figSERF}), so we eventually don't contain the true value of the sample mean in the confidence intervals based on this specification of the DR estimator. Again, more exploration of DR estimations using a wrong parametric outcome model and a random forest propensity is needed to see why this phenomenon is happening.
 
@@ -384,7 +386,7 @@ As for the CI coverage results of the various DR estimations in figure \ref{figC
 
 Going back to the DR estimates that were only specified with Random Forests, figure \ref{fighistRF} suggest asymptotic normality of the distribution of these estimates, like in the parametric setting. \\
 
-Overall the use of Random Forests in this data setting has resulted in consistent DR estimates (with the exception of one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the Random Forests easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and didn't account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that RFs can provide a safety cushion for model specification.
+Overall the use of Random Forests in this data setting has resulted in consistent DR estimates (with the exception of one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the Random Forests easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and did not account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that Random Forests can provide a sort of safety cushion for model specification.
 
 \begin{figure}[h!]
     \centering
@@ -403,7 +405,7 @@ Overall the use of Random Forests in this data setting has resulted in consisten
 \clearpage
 \subsubsection{RF simulation 2: 4 features}
 
-This time we increase the complexity of our DR estimation by adding two new features to the data-generative method from the previous section. We now have $\mathbf{W} = (W_1,W_2,W_3,W_4)$ where $W_1,W_2$ are as before, $W_3$ follows a standard normal distribution and $W_4$ follows an exponential distribution with mean 1. The new true propensity score is 
+This time we increase the complexity of our DR estimation by adding two new features to the data-generative method from the previous section. We now have $\mathbf{W} = (W_1,W_2,W_3,W_4)$ where $W_1,W_2$ are as before, $W_3$ follows a standard normal distribution and $W_4$ follows an exponential distribution with mean 1. The features are mutually independent. The new true propensity score is 
 \begin{align*}
     \pi(\mathbf{W}) = P(R = 1 |\mathbf{W} = (w_1,w_2, w_3,w_4)) = \expit(-w_1 + 2w_1w_2 - w_3 + 2w_3w_4)
 \end{align*}
@@ -413,10 +415,11 @@ and the new true outcome model is
     & = \expit(0.2 - w_1 + 2w_1w_2 - w_3 + 2w_3w_4)
 \end{align*}
 
-We ran simulations using the same combination of nuisance parameter settings as in simulation 1 with 2 features, but this time when we refer to wrong specification, it means the model didn't account for the two interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the Random Forests was also expanded so as to consider up to 4 features at a time in each split. 
+We ran simulations using the same combination of nuisance parameter settings as in simulation 1 with 2 features, but this time when we refer to wrong specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the Random Forests was also expanded so as to consider up to 4 features at a time in each split. 
 
 \subsubsection*{Results}
 
+\todo[inline]{missing sample size N = 1400}
 Unlike the simulation with 2 features, this time with the addition of 2 new features we obtained estimates that had poor convergence rates and consistency problems. Figure \ref{figbiasRF_moreW} already suggests higher bias in the estimators and a deceleration of the bias rate of convergence compared to the simulation with 2 features. This is further illustrated in figure \ref{figsqrtnRF_moreW} as the divergence of the bias elevated to $N^{1/2}$ suggest that the rate of convergence to 0 is slower than $N^{-1/2}$. The only estimator that performed well in this setting, based on the sample sizes considered, is the estimator with a correct logistic outcome model and a Random Forest propensity score that accounts for the interactions terms (orange line in the plots). 
 
 \begin{figure}[h!]
@@ -433,7 +436,7 @@ Unlike the simulation with 2 features, this time with the addition of 2 new feat
     \label{figsqrtnRF_moreW}
 \end{figure}
 
-Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figure \ref{figCIRF_moreW}, in fact many of the estimators have a CI coverage converging to 0. This is further illustrated by the divergence of the SE estimate from the true deviation as seen in figure \ref{figSERF_moreW}. Even for the estimator that had a fast enough bias convergence (orange in plots), the convergence to a 95\% coverage of its CIs is relatively slow, and from sample size 1000 to 1200, there is a slight decrease in coverage. This might suggest a worsening of the CI coverage in larger samples.
+Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figure \ref{figCIRF_moreW}, and in fact many of the estimators have a CI coverage converging to 0. This is further illustrated by the divergence of the SE estimate from the true deviation as seen in figure \ref{figSERF_moreW}. Even for the estimator that had a fast enough bias convergence (orange in plots), the convergence to a 95\% coverage of its CIs is relatively slow, and from sample size 1000 to 1200, there is a slight decrease in coverage. This might suggest a worsening of the CI coverage in larger samples.
 
 \begin{figure}[h!]
     \centering
@@ -449,7 +452,7 @@ Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figu
     \label{figSERF_moreW}
 \end{figure}
 
-It is with no surprise that due to the slowness of the convergences, a normal distribution centered at the true mean hasn't been achieved for the largest sample size considered in the simulation, as seen in figure \ref{fighistRF_moreW}, in particular for the DR estimators involving forests only. \\
+It is with no surprise that due to the slowness of the convergences, a normal distribution centered at the true mean hasn't been achieved for the largest sample size considered in the simulation, in particular for the DR estimators involving forests only, as seen in figure \ref{fighistRF_moreW}. \\
 
 \begin{figure}[h!]
     \centering
@@ -458,7 +461,7 @@ It is with no surprise that due to the slowness of the convergences, a normal di
     \label{fighistRF_moreW}
 \end{figure}
 
-Overall, doubling the number of features has resulted in poor consistency and slow convergence of the DR estimates to the true value of the mean. We have encountered what is called the curse of dimensionality \citep{Wasserman2006}: by doubling the number of features the complexity of training the Random Forests overcomes correct classification or regression, leading to the poor convergence of our DR estimates to the true value. Had we chosen distributions with a smaller range of values for $W_3,W_4$, we might have alleviated the complexity of the classification problem. Hence, although we had found good results using Random Forests in the 2-features case, one must take into account the complexity of the dataset and classification/regression problem before choosing to use a Random Forests to set the nuisance parameters of a DR estimator.
+Overall, doubling the number of features has resulted in poor consistency and slow convergence of the DR estimates to the true value of the mean. We have encountered what is called the curse of dimensionality \citep{Wasserman2006}: by doubling the number of features, the complexity of training the Random Forests overcomes correct classification or regression, leading to the poor convergence of our DR estimates to the true value. Had we chosen distributions with a smaller range of values for $W_3,W_4$, we might have alleviated the complexity of the classification problem. Hence, although we had found good results using Random Forests in the 2-features case, one must take into account the complexity of the dataset and classification/regression problem before choosing to use a Random Forest to set the nuisance parameters of a DR estimator.
 
 \clearpage
 \subsection{Using Multi-Layer Perceptrons}
@@ -469,15 +472,15 @@ Overall, doubling the number of features has resulted in poor consistency and sl
     \label{fignn}
 \end{figure}
 
-This section is motivated by the publication by \citet{setoguchi-nn} suggesting that Neural Networks reduce the bias of propensity scores compared to logistic regression, and hence should also alleviate the bias of the DR estimator. This time we are using Multilayer Perceptrons, a type of forward-feeding artificial neural network. As mentioned by \citet{hastieESL}, there is a lot of popularity surrounding neural networks lately, and like Random Forests, they are easy to implement in Python thanks to the scikit-learn module. The training time of an MLP is also faster than that of a Random Forest for models with a small number of features. 
+This section is motivated by the publication by \citet{setoguchi-nn} suggesting that neural networks reduce the bias of propensity scores compared to logistic regression, and hence should also alleviate the bias of the DR estimator. This time we are using Multilayer Perceptrons, a type of forward-feeding artificial neural network. As mentioned by \citet{hastieESL}, there is a lot of popularity surrounding neural networks lately, and like Random Forests, they are easy to implement in Python thanks to the scikit-learn module. The training time of a MLP is also faster than that of a Random Forest for models with a small number of features. 
 
 In a classification problem, there are $K$ output nodes at the end of the network diagram corresponding to the $K$ categories the output $Y$ can be in. The first layer of nodes in the diagram corresponds to the $p$ input features. Then, each node in the hidden layers of the network is created as a linear combination of the previous layer's nodes. At the end of the network, the output nodes are created as functions of linear combinations of the last hidden layer's nodes. An illustration of the network diagram of a single layer perceptron is provided in figure \ref{fignn}, taken from \textit{The Elements of Statistical Learning} by \citet{hastieESL}.
 
-In the following sections we will evaluate the use of MLPs for DR estimation, through simulations on the dataset we have encountered in the previous sections.
+In the following sections we will evaluate the use of MLPs for DR estimation, through simulations on the data setting we have encountered in the previous sections.
 
 \subsubsection{MLP simulation 1: 2 features}
 
-We go back to the data structure that had 2 features $W_1,W_2$, adn we wish to see what happens to the consistency of the DR estimates when we use MLPs for the propensity score or outcome model. The various DR estimates based on MLP nuisance parameters are as follows: 
+We go back to the data structure that had 2 features $W_1,W_2$, and we wish to see what happens to the consistency of the DR estimates when we use MLPs for the propensity score or outcome model. The various DR estimates based on MLP nuisance parameters are as follows: 
 \begin{itemize}
     \item \texttt{DR logistic ps, MLP om}: the propensity is a correctly specified logistic regression, and the outcome model is a MLP. Both model account for the interaction term between $W_1$ and $W_2$
     \item \texttt{DR logistic om, MLP ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a MLP.
@@ -490,7 +493,7 @@ We go back to the data structure that had 2 features $W_1,W_2$, adn we wish to s
     \item \texttt{DR exact}: both the propensity and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
 \end{itemize}
 
-Like with Random Forests, the MLPs also go through a 5-fold cross-validation process to tune model parameters. A summary of the range of parameters tested by the cross-valdiation is summarised in table \ref{tableMLP}.
+Like with Random Forests, the MLPs also go through a 5-fold cross-validation process to tune model parameters. A summary of the range of parameters tested by the cross-validation is provided in table \ref{tableMLP}.
 
 \begin{table}[h!]
     \centering
@@ -523,7 +526,7 @@ Like with Random Forests, the MLPs also go through a 5-fold cross-validation pro
     \label{figsqrtnMLP}
 \end{figure}
 
-In figure \ref{figbiasMLP} we notice that all estimates involving at least one MLP nuisance parameters have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score, and it outperforms the estimate with logistic propensity score. This goes in line with the findings of \citet{setoguchi-nn} about an MLP propensity score having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameters performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with wrong logistic outcome model and MLP propensity score (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with wrong logistic outcome model and propensity MLP shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with wrong logistic propensity score and MLP outcome model, \texttt{DR wrong logistic ps, MLP om} (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with wrong MLP propensity and MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
+In figure \ref{figbiasMLP} we notice that most estimates involving at least one MLP nuisance parameters have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score, and it outperforms the estimate with logistic propensity score. This goes in line with the findings of \citet{setoguchi-nn} about an MLP propensity score having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameters performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with wrong logistic outcome model and MLP propensity score (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with wrong logistic outcome model and propensity MLP shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with wrong logistic propensity score and MLP outcome model, \texttt{DR wrong logistic ps, MLP om} (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with wrong MLP propensity and MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
 
 \begin{figure}[h!]
     \centering
@@ -532,7 +535,7 @@ In figure \ref{figbiasMLP} we notice that all estimates involving at least one M
     \label{figCIMLP}
 \end{figure}
 
-The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR wrong MLP om, MLP ps} and \texttt{DR wrong MLP ps \& om} (in blue, orange pink and grey) have CI coverages tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest to be tending towards the true value. On the other hand, we see a U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR wrong MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score is actually providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR wrong logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
+The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR wrong MLP om, MLP ps} and \texttt{DR wrong MLP ps \& om} (in blue, orange pink and grey) have CI coverage tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest to be tending towards the true value. On the other hand, we see a upside down U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR wrong MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score is actually providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR wrong logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
 
 \begin{figure}[h!]
     \centering
@@ -550,13 +553,13 @@ The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \te
 
 Taking a particular look at the histograms of the DR estimates involving only MLPs for the largest sample size considered, we notice that although \texttt{DR MLP} and \texttt{DR wrong MLP om, MLP ps} have distributions almost centered at the true mean, we know from the diverging trend of their CI coverage at larger samples that these histogram will be less and less centered at the true mean as we increase sample size, so we wouldn't expect asymptotic normality from these. On the other hand, from the way the bias and CI coverage of \texttt{DR wrong MLP ps \& om} and \texttt{DR wrong MLP ps, MLP om} were converging, we are likely to get asymptotic normal distribution from these estimates, although at a slower rate than the parametric setting. Since \texttt{DR wrong MLP ps \& om} had higher bias, its histogram in figure \ref{fighistMLP} is less centered at the true value than that of \texttt{DR wrong MLP ps, MLP om} at the given sample size. One would expect to see better centering of these histogram, had a larger sample size been considered.
 \clearpage
-\subsubsection{Simulation 2: 4 features}
+\subsubsection{MLP simulation 2: 4 features}
 
 \todo[inline]{to be added once results come back}
 
 \clearpage
-\subsection{Comparison of the three methods}
-
+\subsection{Discussion}
+\todo[inline]{missing sample size N = 1200, 1400}
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.8\columnwidth]{figures/biascompare.png}
@@ -570,8 +573,22 @@ Taking a particular look at the histograms of the DR estimates involving only ML
     \caption{Caption}
     \label{fig:my_label}
 \end{figure}
-\clearpage
-\section{Discussion}
+
+\todo[inline]{waiting for more results}
+
+- RF gives lower bias but convergence rate is slow compared to MLP 
+
+- RF: with/without interaction terms not an issue, MLP: without interaction for ps gives better convergence rates 
+
+- why is bias diverging after some sample size for some MLPs?
+
+- there might be issues of overfitting here since we train and test on 80\% data but fit on 100\%
+
+- complexity of the data set has a lot of influence on these performances; continuous features = infinite input categories -> difficult to train classification model 
+
+- more simulations on various data settings would be need to make more general remakrs on ML tools
+
+- but ML tools = data adaptive so in real world scenario one would likely test a few tools and pick the one that give best ps / om fit on new data 
 
 \section{Conclusion}
 
