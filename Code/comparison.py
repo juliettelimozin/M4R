@@ -87,7 +87,7 @@ labels_MLP = ['DR logistic ps, MLP om',
           'DR exact']
 
 numbers = [2,5,6,7]
-fig, (ax1,ax2) = plt.subplots(1,2,sharey = True, figsize = (10,6.6))
+fig, (ax1,ax2) = plt.subplots(1,2,sharey = True, figsize = (15,6.6))
 
 for i in numbers:
     ax1.plot(N, bias_RF[i,:], label = labels_RF[i], marker = i)
@@ -105,7 +105,7 @@ fig.suptitle('Emperial bias convergence of RF vs MLP DR estimators', fontsize = 
 plt.savefig('../figures/biascompare.png')
 plt.show()
 
-fig, (ax1,ax2) = plt.subplots(1,2,sharey = True, figsize = (10,6.6))
+fig, (ax1,ax2) = plt.subplots(1,2,sharey = True, figsize = (15,6.6))
 
 for i in numbers:
     ax1.plot(N, np.multiply(np.sqrt(N),bias_RF[i,:]), label = labels_RF[i], marker = i)
