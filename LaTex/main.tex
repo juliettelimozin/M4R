@@ -90,16 +90,15 @@ To summarise:
 
 The outcome is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}, i.e $P(R=r|\mathbf{W}, Y) = P(R= r|\mathbf{W})$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y|\mathbf{W})$. So in the example of a clinical trial, we would consider the data set obtained from the study to be MAR if given the measurements taken from the patients, the reasons why some patients dropped out were unrelated to the outcome of the trial. The MAR setting will therefore have effects on any statistical inference we may perform on this data set.
 
-When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}.\\
+When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}, i.e. $P(R=r|\mathbf{W}, Y) = P(R = r)$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y)$. Hence any estimation on the outcome data is unbiased, but a data set is, in practice, rarely MCAR.\\
 
 We make the assumption that $(\mathbf{W}_1, Y_1, R_1),...,(\mathbf{W}_n, Y_n, R_n)$ are independent and identically distributed for the rest of the report. We also assume that $R$ is independent of $Y$ given $\mathbf{W}$ so $(\mathbf{W}_1, Y_1, R_1), ... ,(\mathbf{W}_n, Y_n, R_n)$ are MAR \citep{vansteelandt}, where the index $i = 1,...,n$ denotes the $i$th individual of the data.\\
 
-\clearpage
 \section{Non-robust and DR estimators}
 
 \subsection{Inverse Probability Weighting approach}
 
-Suppose we wish to calculate or estimate the outcome mean $\beta = E(\mathbf{Y})$. A problem occurs when trying to compute it as $\mathbf{Y}$ is only partially observed, so calculating a mean with only the observed outcomes would not be a good representation of the data outcome as a whole.
+Suppose we wish to calculate or estimate the outcome mean $\beta = E(\mathbf{Y})$. A problem occurs when trying to compute it as $\mathbf{Y}$ is only partially observed, so calculating an estimate of the outcome mean with only the observed outcomes values would be a biased estimation in a MAR setting.
 
 One solution to this problem is the inverse probability weighting (IPW) approach. Its name comes from the fact that each observed outcome $Y_i$ (called \textit{complete} case) is weighted by the propensity score, denoted by
 \begin{align*}
@@ -190,9 +189,9 @@ Thus we have shown that when at least one of the two models is correctly specifi
 
 \subsection{Parametric DR estimation}
 
-In standard parametric DR estimation, it is fairly common to define the propensity and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages. They also offer theoretical backing that would allow us to make statistical inference.\\
+In standard parametric DR estimation, it is fairly common to define the propensity score and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages. They also offer theoretical backing that would allow us to make statistical inference.\\
 
-Although this version of the DR estimator that these models lead to has been established as the usual estimator, \cite{kang} have shown it performs poorly when either the propensity or both models are misspecified, i.e when logistic and linear regressions aren't the judicious choice of models for the data. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
+Although this version of the DR estimator that these models lead to has been established as the usual estimator, \cite{kang} have shown it performs poorly when either the propensity scoreor both models are misspecified, i.e when the distribution assumptions tied with linear or logistic regression do not apply to the actual distribution of the outcome. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
 
 Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome \citep{vansteelandt}.
 
@@ -265,7 +264,7 @@ from \citet{lunceford_davidian}. \\
     \label{figsqrtnpara}
 \end{figure}
 
-Figure \ref{figbiaspara} suggests that the DR estimators with at least one correct specification of the nuisance parameter estimates are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $N^{-1/2}$. We also notice that the DR estimation with wrong propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}. As expected, we also observe poor bias from the DR estimator with both nuisance parameter estimates misspecified, with a diverging $\sqrt{N}$bias curve, confirming that the misspecification of both parameters leads to inconsistent DR estimator.
+Figure \ref{figbiaspara} suggests that the DR estimators with at least one correct specification of the nuisance parameter estimates are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $N^{-1/2}$. We also notice that the DR estimation with misspecified propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}. As expected, we also observe poor bias from the DR estimator with both nuisance parameter estimates misspecified, with a diverging $\sqrt{N}$bias curve, confirming that the misspecification of both parameters leads to inconsistent DR estimator.
 
 \begin{figure}[h!]
     \centering
@@ -281,9 +280,9 @@ Figure \ref{figbiaspara} suggests that the DR estimators with at least one corre
     \label{figSEpara}
 \end{figure}
 
-Figure \ref{figCIpara} shows the empirical coverage of the 95\% CIs of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the SE was specifically for correctly specified model, the coverage for the DR estimations with one wrong nuisance parameter model are either too high or too low. To get a better estimation of the SE, one could try other non-model based methods such as bootstrapping, which calculates an estimate of the sample variance based on random samples of the DR estimates. On the flip-side, we notice that for the misspecified DR estimator, as expected the coverage of its CIs converge rapidly to 0, i.e. the CIs based on this misspecified estimator eventually don't contain the true value $\beta$.
+Figure \ref{figCIpara} shows the empirical coverage of the 95\% CIs of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the SE was specifically for correctly specified model, the coverage for the DR estimations with one misspecified nuisance parameter model are either too high or too low. To get a better estimation of the SE, one could try other non-model based methods such as bootstrapping, which calculates an estimate of the sample variance based on random samples of the DR estimates. On the flip-side, we notice that for the misspecified DR estimator, as expected the coverage of its CIs converge rapidly to 0, i.e. the CIs based on this misspecified estimator eventually don't contain the true value $\beta$.
 
-Figure \ref{figSEpara} confirms the results we saw above, as we see the ratio of the standard deviation of the DR estimates to the average SE estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the CI bounds. As for the DR estimations with one wrong model, this ratio is above or below 1 for \texttt{DR mis. propensity score} and \texttt{DR mis. outcome model} respectively. This indicates that the SE estimation we used is positively or negatively biased, hence giving a CI coverage that is too low for the DR estimator with misspecified outcome model, or too high for the DR estimator with misspecified propensity score model. As for the standard deviation to mean SE estimate ratio for the misspecified DR estimator, since the SE estimation is based on correctly specified nuisance parameter estimates, it is to no surprise that it is inconsistent in this case, so the ratio diverges.
+Figure \ref{figSEpara} confirms the results we saw above, as we see the ratio of the standard deviation of the DR estimates to the average SE estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the CI bounds. As for the DR estimations with one misspecified model, this ratio is above or below 1 for \texttt{DR mis. propensity score} and \texttt{DR mis. outcome model} respectively. This indicates that the SE estimation we used is positively or negatively biased, hence giving a CI coverage that is too low for the DR estimator with misspecified outcome model, or too high for the DR estimator with misspecified propensity score model. As for the standard deviation to mean SE estimate ratio for the misspecified DR estimator, since the SE estimation is based on correctly specified nuisance parameter estimates, it is to no surprise that it is inconsistent in this case, so the ratio diverges.
 
 \begin{figure}[h!]
     \centering
@@ -322,15 +321,15 @@ RFs are a beginner friendly ML tool that create a classification or regression m
 
 We use the same data generated in section \ref{para_model}, and this time we calculate DR estimators with various nuisance parameter models that are logistic regressions or RFs:
 \begin{itemize}
-    \item \texttt{DR logistic ps, forest om}: the propensity is a correctly specified logistic regression, and the outcome model is a RF. Both model account for the interaction term between $W_1$ and $W_2$ in feature engineering.
-    \item \texttt{DR logistic om, forest ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a RF.
-    \item \texttt{DR forest}: both the propensity and the outcome model are RFs that account for the interaction term between $W_1$ and $W_2$ in feature engineering.
-    \item \texttt{DR wrong logistic om, forest ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score is a correctly specified RF.
-    \item \texttt{DR wrong logistic ps, forest om}: the propensity is an incorrectly specified logistic regression, and the outcome model is a correctly specified RF.
-    \item \texttt{DR wrong forest om, forest ps}: the outcome model is an incorrectly specified RF (i.e no interaction term in feature engineering), and the propensity score is a correctly specified RF.
-    \item \texttt{DR wrong forest ps, forest om}: the propensity is an incorrectly specified RF (i.e no interaction term in feature engineering), and the outcome model is a correctly specified RF.
-    \item \texttt{DR wrong forest ps \& om}: both the propensity and the outcome model are incorrectly specified RFs in feature engineering.
-    \item \texttt{DR exact}: both the propensity and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
+    \item \texttt{DR logistic ps, RF om}: the propensity score model is a correctly specified logistic regression, and the outcome model is a RF. Both model account for the interaction term between $W_1$ and $W_2$ in feature engineering.
+    \item \texttt{DR logistic om, RF ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a RF.
+    \item \texttt{DR RF}: both the propensity score model and the outcome model are RFs that account for the interaction term between $W_1$ and $W_2$ in feature engineering.
+    \item \texttt{DR mis. logistic om, RF ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score model is a correctly specified RF.
+    \item \texttt{DR mis. logistic ps, RF om}: the propensity score model is an incorrectly specified logistic regression, and the outcome model is a correctly specified RF.
+    \item \texttt{DR mis. RF om, RF ps}: the outcome model is an incorrectly specified RF (i.e no interaction term in feature engineering), and the propensity score model is a correctly specified RF.
+    \item \texttt{DR mis. RF ps, RF om}: the propensity score model is an incorrectly specified RF (i.e no interaction term in feature engineering), and the outcome model is a correctly specified RF.
+    \item \texttt{DR mis. RF ps \& om}: both the propensity score model and the outcome model are incorrectly specified RFs in feature engineering.
+    \item \texttt{DR exact}: both the propensity score model and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
 \end{itemize}
 
 Each time a RF is specified, it goes through a stratified 5-fold cross validation of RF parameters in order to input the parameters that give a RF with the best accuracy on the test sets. A summary of the parameters tested by the cross-validation is provided in table \ref{tableRF}.\\
@@ -368,13 +367,13 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
     \label{figsqrtnRF}
 \end{figure}
 
-We notice in figure \ref{figbiasRF} that the models with RF still provide DR estimates that have bias converging to 0, even when the propensity and outcome model are set using a RF that doesn't account for the interaction term. This suggests that the RF is able to recover the misspecification, making it a useful tool in setting the nuisance parameter models. Based on the sample sizes considered, figure \ref{figsqrtnRF} also suggests that theses models have biases with rate of convergence to 0 faster than $N^{-1/2}$, which further illustrates the double robustness of the estimator.
+We notice in figure \ref{figbiasRF} that the models with RF still provide DR estimates that have bias converging to 0, even when the propensity score model and outcome model are set using a RF that doesn't account for the interaction term. This suggests that the RF is able to recover the interaction, making it a useful tool in setting the nuisance parameter models. Based on the sample sizes considered, figure \ref{figsqrtnRF} also suggests that theses models have biases with rate of convergence to 0 faster than $N^{-1/2}$, which further illustrates the double robustness of the estimator.
 
-We also notice that when the outcome model was a RF and the propensity was wrongly specified with a model that doesn't account for the interaction term, whether that was a logistic regression or a RF, the bias still performs well, which is in line with what \citet{ps_SL} have shown about the recovery of unbiasedness with ML tools for the outcome model when dealing with a wrong propensity score. 
+We also notice that when the outcome model was a RF and the propensity score model was misspecified with a model that doesn't account for the interaction term, whether that was a logistic regression or a RF, the bias still performs well, which is in line with what \citet{ps_SL} have shown about the recovery of unbiasedness with ML tools for the outcome model when dealing with a misspecified propensity score model. 
 
-However these figures show an unusual result for the model that had a wrong logistic outcome model, paired with a RF propensity score. As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence to 0 is slower than $N^{-1/2}$, making this estimate inconsistent, whereas when the misspecification of the outcome model is through a RF, the bias still performs well (its brown line on the graph is overlapped with the grey line). This makes us wonder if a RF on the propensity is not strong enough to recover the parametric misspecification of the outcome model.
+However these figures show an unusual result for the model that had a misspecified logistic outcome model, paired with a RF propensity score model. As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence to 0 is slower than $N^{-1/2}$, whereas when the misspecification of the outcome model is through a RF, the bias still performs well (its brown line on the graph is overlapped with the grey line). This makes us wonder if a RF on the propensity score model is not strong enough to recover the parametric misspecification of the outcome model.
 
-As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the SE at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the wrong logistic outcome model and RF propensity, this CI coverage simply converges to 0 (with the SE estimate diverging from the standard deviation in \ref{figSERF}), so we eventually don't contain the true value of the sample mean in the CIs based on this specification of the DR estimator. Again, more exploration of DR estimations using a wrong parametric outcome model and a RF propensity is needed to see why this phenomenon is happening.
+As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the SE at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the misspecified logistic outcome model and RF propensity, this CI coverage simply converges to 0 (with the SE estimate diverging from the standard deviation in \ref{figSERF}), so we eventually don't contain the true value of the sample mean in the CIs based on this specification of the DR estimator. Again, more exploration of DR estimations using a misspecified parametric outcome model and a RF propensity score model is needed to see why this phenomenon is happening.
 
 \begin{figure}[h!]
     \centering
@@ -404,7 +403,7 @@ Overall the use of RFs in this data setting has resulted in consistent DR estima
 \clearpage
 \subsubsection{RF simulation 2: 4 features}
 
-This time we increase the complexity of our DR estimation by adding two new features to the data-generative method from the previous section. We now have $\mathbf{W} = (W_1,W_2,W_3,W_4)$ where $W_1,W_2$ are as before, $W_3$ follows a standard normal distribution and $W_4$ follows an exponential distribution with mean 1. The features are mutually independent. The new true propensity score is 
+This time we increase the complexity of our DR estimation by adding two new features to the data-generative method from the previous section. We now have $\mathbf{W} = (W_1,W_2,W_3,W_4)$ where $W_1,W_2$ are as before, $W_3$ follows a standard normal distribution and $W_4$ follows an exponential distribution with mean 1. The features are mutually independent. The new true propensity score model is 
 \begin{align*}
     \pi(\mathbf{W}) = P(R = 1 |\mathbf{W} = (w_1,w_2, w_3,w_4)) = \expit(-w_1 + 2w_1w_2 - w_3 + 2w_3w_4)
 \end{align*}
@@ -414,12 +413,12 @@ and the new true outcome model is
     & = \expit(0.2 - w_1 + 2w_1w_2 - w_3 + 2w_3w_4)
 \end{align*}
 
-We ran simulations using the same combination of nuisance parameter model settings as in simulation 1 with 2 features, but this time when we refer to wrong specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the RFs was also expanded so as to consider up to 4 features at a time in each split. 
+We ran simulations using the same combination of nuisance parameter model settings as in simulation 1 with 2 features, but this time when we refer to misspecified specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the RFs was also expanded so as to consider up to 4 features at a time in each split. 
 
 \subsubsection*{Results}
 
 \todo[inline]{missing sample size N = 1400}
-Unlike the simulation with 2 features, this time with the addition of 2 new features we obtained estimates that had poor convergence rates. Figure \ref{figbiasRF_moreW} already suggests higher bias in the estimators and a deceleration of the bias rate of convergence compared to the simulation with 2 features. This is further illustrated in figure \ref{figsqrtnRF_moreW} as the divergence of the bias elevated to $N^{1/2}$ suggest that the rate of convergence to 0 is slower than $N^{-1/2}$. The only estimator that performed well in this setting, based on the sample sizes considered, is the estimator with a correct logistic outcome model and a RF propensity score that accounts for the interactions terms (orange line in the plots). 
+Unlike the simulation with 2 features, this time with the addition of 2 new features we obtained estimates that had poor convergence rates. Figure \ref{figbiasRF_moreW} already suggests higher bias in the estimators and a deceleration of the bias rate of convergence compared to the simulation with 2 features. This is further illustrated in figure \ref{figsqrtnRF_moreW} as the divergence of the bias elevated to $N^{1/2}$ suggest that the rate of convergence to 0 is slower than $N^{-1/2}$. The only estimator that performed well in this setting, based on the sample sizes considered, is the estimator with a correct logistic outcome model and a RF propensity score model that accounts for the interactions terms (orange line in the plots). 
 
 \begin{figure}[h!]
     \centering
@@ -471,7 +470,7 @@ Overall, doubling the number of features has resulted in poor bias and slow conv
     \label{fignn}
 \end{figure}
 
-This section is motivated by the publication by \citet{setoguchi-nn} suggesting that neural networks reduce the bias of propensity scores compared to logistic regression, and hence should also alleviate the bias of the DR estimator. This time we are using MLPs, a type of forward-feeding artificial neural network. As mentioned by \citet{hastieESL}, there is a lot of popularity surrounding neural networks lately, and like RFs, they are easy to implement in Python thanks to the scikit-learn module. The training time of a MLP is also faster than that of a RF for models with a small number of features. 
+This section is motivated by the publication by \citet{setoguchi-nn} suggesting that neural networks reduce the bias of propensity score models compared to logistic regression, and hence should also alleviate the bias of the DR estimator. This time we are using MLPs, a type of forward-feeding artificial neural network. As mentioned by \citet{hastieESL}, there is a lot of popularity surrounding neural networks lately, and like RFs, they are easy to implement in Python thanks to the scikit-learn module. The training time of a MLP is also faster than that of a RF for models with a small number of features. 
 
 In a classification problem, there are $K$ output nodes at the end of the network diagram corresponding to the $K$ categories the output $Y$ can be in. The first layer of nodes in the diagram corresponds to the $p$ input features. Then, each node in the hidden layers of the network is created as a linear combination of the previous layer's nodes. At the end of the network, the output nodes are created as functions of linear combinations of the last hidden layer's nodes. An illustration of the network diagram of a single layer perceptron is provided in figure \ref{fignn}, taken from \textit{The Elements of Statistical Learning} by \citet{hastieESL}.
 
@@ -479,17 +478,17 @@ In the following sections we will evaluate the use of MLPs for DR estimation, th
 
 \subsubsection{MLP simulation 1: 2 features}
 
-We go back to the data structure that had 2 features $W_1,W_2$, and we wish to see what happens to the consistency of the DR estimates when we use MLPs for the propensity score or outcome model. The various DR estimates based on MLP nuisance parameter models are as follows: 
+We go back to the data structure that had 2 features $W_1,W_2$, and we wish to see what happens to the consistency of the DR estimates when we use MLPs for the propensity score model or outcome model. The various DR estimates based on MLP nuisance parameter models are as follows: 
 \begin{itemize}
-    \item \texttt{DR logistic ps, MLP om}: the propensity is a correctly specified logistic regression, and the outcome model is a MLP. Both model account for the interaction term between $W_1$ and $W_2$
-    \item \texttt{DR logistic om, MLP ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a MLP.
-    \item \texttt{DR MLP}: both the propensity and the outcome model are MLPs that account for the interaction term between $W_1$ and $W_2$.
-    \item \texttt{DR wrong logistic om, MLP ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score is a correctly specified MLP.
-    \item \texttt{DR wrong logistic ps, MLP om}: the propensity is an incorrectly specified logistic regression, and the outcome model is a correctly specified MLP.
-    \item \texttt{DR wrong MLP om, MLP ps}: the outcome model is an incorrectly specified MLP (i.e no interaction term), and the propensity score is a correctly specified MLP.
-    \item \texttt{DR wrong MLP ps, MLP om}: the propensity is an incorrectly specified MLP (i.e no interaction term), and the outcome model is a correctly specified MLP.
-    \item \texttt{DR wrong MLP ps \& om}: both the propensity and the outcome model are incorrectly specified MLPs.
-    \item \texttt{DR exact}: both the propensity and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
+    \item \texttt{DR logistic ps, MLP om}: the propensity score model is a correctly specified logistic regression, and the outcome model is a MLP. Both model account for the interaction term between $W_1$ and $W_2$
+    \item \texttt{DR logistic om, MLP ps}: the outcome model is a correctly specified logistic regression, and the propensity score model is a MLP.
+    \item \texttt{DR MLP}: both the propensity score model and the outcome model are MLPs that account for the interaction term between $W_1$ and $W_2$.
+    \item \texttt{DR mis. logistic om, MLP ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score model is a correctly specified MLP.
+    \item \texttt{DR mis. logistic ps, MLP om}: the propensity score model is an incorrectly specified logistic regression, and the outcome model is a correctly specified MLP.
+    \item \texttt{DR mis. MLP om, MLP ps}: the outcome model is an incorrectly specified MLP (i.e no interaction term), and the propensity score model is a correctly specified MLP.
+    \item \texttt{DR mis. MLP ps, MLP om}: the propensity score model is an incorrectly specified MLP (i.e no interaction term), and the outcome model is a correctly specified MLP.
+    \item \texttt{DR mis. MLP ps \& om}: both the propensity score model and the outcome model are incorrectly specified MLPs.
+    \item \texttt{DR exact}: both the propensity score model and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
 \end{itemize}
 
 Like with RFs, the MLPs also go through a 5-fold cross-validation process to tune model parameters. A summary of the range of parameters tested by the cross-validation is provided in table \ref{tableMLP}.
@@ -525,7 +524,7 @@ Like with RFs, the MLPs also go through a 5-fold cross-validation process to tun
     \label{figsqrtnMLP}
 \end{figure}
 
-In figure \ref{figbiasMLP} we notice that most estimates involving at least one MLP nuisance parameter models have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score, and it outperforms the estimate with logistic propensity score. This goes in line with the findings of \citet{setoguchi-nn} about an MLP propensity score having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameter models performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with wrong logistic outcome model and MLP propensity score (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with wrong logistic outcome model and propensity MLP shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with wrong logistic propensity score and MLP outcome model, \texttt{DR wrong logistic ps, MLP om} (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with wrong MLP propensity and MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
+In figure \ref{figbiasMLP} we notice that most estimates involving at least one MLP nuisance parameter models have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score model, and it outperforms the estimate with logistic propensity score model. This goes in line with the findings of \citet{setoguchi-nn} about a MLP propensity score model having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameter models performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with misspecified logistic outcome model and MLP propensity score model (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with misspecified logistic outcome model and MLP propensity score model shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with misspecified logistic propensity score model and MLP outcome model, \texttt{DR mis. logistic ps, MLP om} (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with misspecified MLP propensity score modeland MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
 
 \begin{figure}[h!]
     \centering
@@ -534,7 +533,7 @@ In figure \ref{figbiasMLP} we notice that most estimates involving at least one 
     \label{figCIMLP}
 \end{figure}
 
-The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR wrong MLP om, MLP ps} and \texttt{DR wrong MLP ps \& om} (in blue, orange pink and grey) have CI coverage tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest to be tending towards the true value. On the other hand, we see a upside down U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR wrong MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score is actually providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR wrong logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
+The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR mis. MLP om, MLP ps} and \texttt{DR mis. MLP ps \& om} (in blue, orange pink and grey) have CI coverage tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest to be tending towards the true value. On the other hand, we see a upside down U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR mis. MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score model is actually providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR mis. logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
 
 \begin{figure}[h!]
     \centering
@@ -550,7 +549,7 @@ The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \te
     \label{fighistMLP}
 \end{figure}
 
-Taking a particular look at the histograms of the DR estimates involving only MLPs for the largest sample size considered, we notice that although \texttt{DR MLP} and \texttt{DR wrong MLP om, MLP ps} have distributions almost centered at the true mean, we know from the diverging trend of their CI coverage at larger samples that these histogram will be less and less centered at the true mean as we increase sample size, so we wouldn't expect asymptotic normality from these. On the other hand, from the way the bias and CI coverage of \texttt{DR wrong MLP ps \& om} and \texttt{DR wrong MLP ps, MLP om} were converging, we are likely to get asymptotic normal distribution from these estimates, although at a slower rate than the parametric setting. Since \texttt{DR wrong MLP ps \& om} had higher bias, its histogram in figure \ref{fighistMLP} is less centered at the true value than that of \texttt{DR wrong MLP ps, MLP om} at the given sample size. One would expect to see better centering of these histogram, had a larger sample size been considered.
+Taking a particular look at the histograms of the DR estimates involving only MLPs for the largest sample size considered, we notice that although \texttt{DR MLP} and \texttt{DR mis. MLP om, MLP ps} have distributions almost centered at the true mean, we know from the diverging trend of their CI coverage at larger samples that these histogram will be less and less centered at the true mean as we increase sample size, so we wouldn't expect asymptotic normality from these. On the other hand, from the way the bias and CI coverage of \texttt{DR mis. MLP ps \& om} and \texttt{DR mis. MLP ps, MLP om} were converging, we are likely to get asymptotic normal distribution from these estimates, although at a slower rate than the parametric setting. Since \texttt{DR mis. MLP ps \& om} had higher bias, its histogram in figure \ref{fighistMLP} is less centered at the true value than that of \texttt{DR mis. MLP ps, MLP om} at the given sample size. One would expect to see better centering of these histogram, had a larger sample size been considered.
 \clearpage
 \subsubsection{MLP simulation 2: 4 features}
 
@@ -561,14 +560,14 @@ Taking a particular look at the histograms of the DR estimates involving only ML
 \todo[inline]{missing sample size N = 1200, 1400}
 \begin{figure}[h!]
     \centering
-    \includegraphics[width = 0.8\columnwidth]{figures/biascompare.png}
+    \includegraphics[width = 0.9\columnwidth]{figures/biascompare.png}
     \caption{Comparing bias performance on simulation with 2 features}
     \label{fig:my_label}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width = 0.8\columnwidth]{figures/sqrtncompare.png}
+    \includegraphics[width = 0.9\columnwidth]{figures/sqrtncompare.png}
     \caption{Caption}
     \label{fig:my_label}
 \end{figure}
@@ -597,7 +596,8 @@ Taking a particular look at the histograms of the DR estimates involving only ML
 \bibliography{bibliography}
 
 \clearpage
-\section{Appendix}
+\section*{Appendix}
+\addcontentsline{toc}{section}{Appendix}
 
 \subsection*{Code for DR simulation}
 
