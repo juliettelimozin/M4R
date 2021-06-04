@@ -17,22 +17,23 @@ from DR_estimation import DR_estimator, RF_crossval
 import time
 W1 = np.random.uniform(-2,2,1000000)
 W2 = np.random.binomial(1,0.5,1000000)
-A = np.random.binomial(1, expit(-W1 + 2*np.multiply(W1,W2)), 1000000)
-Y =np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2)), 1000000)
+W3 = np.random.normal(0,1,1000000)
+W4 = np.random.exponential(1,1000000)
+A = np.random.binomial(1, expit(-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)), 1000000)
+Y = np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)), 1000000)
 
-B_true = np.mean(expit(0.2-W1+ 2*np.multiply(W1,W2)))
-
+B_true = np.mean(expit(0.2-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)))
 iters = 2500
-N = [200*i for i in range(1,7)]
+N = [200*i for i in range(1,3)]
 
 estimates = np.zeros((9,iters,len(N)))
 CI = 1.0*estimates
 SEs = 1.0*CI
 
 for i in range(len(N)):
-    estimates[:,:,i] = np.load('estimates_RF'+ str(N[i]) + '.npy')
-    CI[:,:,i] = np.load('CI_RF'+ str(N[i]) + '.npy')
-    SEs[:,:,i] = np.load('SEs_RF'+ str(N[i]) + '.npy')
+    estimates[:,:,i] = np.load('estimates_MLP_moreW_'+ str(N[i]) + '.npy')
+    CI[:,:,i] = np.load('CI_MLP_moreW_'+ str(N[i]) + '.npy')
+    SEs[:,:,i] = np.load('SEs_MLP_moreW_'+ str(N[i]) + '.npy')
    
 bias = np.zeros((9,len(N)))       
 for i in range(9):
@@ -47,14 +48,14 @@ for i in range(9):
                                                              axis = 0)
 
 
-labels = ['DR logistic ps, RF om',
-          'DR logistic om, RF ps',
-          'DR RF',
-          'DR mis. logistic om, RF ps',
-          'DR mis. logistic ps, RF om',
-          'DR mis. RF om, RF ps',
-          'DR mis. RF ps, RF om',
-          'DR mis. RF ps & om',
+labels = ['DR logistic ps, MLP om',
+          'DR logistic om, MLP ps',
+          'DR MLP',
+          'DR mis. logistic om, MLP ps',
+          'DR mis. logistic ps, MLP om',
+          'DR mis. MLP om, MLP ps',
+          'DR mis. MLP ps, MLP om',
+          'DR mis. MLP ps & om',
           'DR exact spec.']
 
 plt.figure(figsize = (10,6.6))
@@ -65,7 +66,7 @@ plt.hlines(0, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size', fontsize = 15)
 plt.ylabel('Bias', fontsize = 15)
 plt.title('Emperial bias convergence of various DR estimators', fontsize = 15)
-plt.savefig('../figures/biasRF.png')
+plt.savefig('../figures/biasMLP.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -76,7 +77,7 @@ plt.hlines(0.95, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size', fontsize =15)
 plt.ylabel('Coverage', fontsize = 15)
 plt.legend()
-plt.savefig('../figures/CIRF.png')
+plt.savefig('../figures/CIMLP.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -87,7 +88,7 @@ plt.hlines(1, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size', fontsize = 15)
 plt.ylabel(r'SD($ \hat \beta )/ \widebar{\widehat{se}_{n}}$', fontsize = 15)
 plt.title('Ratio of standard deviation to mean standard error estimates', fontsize = 15)
-plt.savefig('../figures/SERF.png')
+plt.savefig('../figures/SEMLP.png')
 plt.show()
 
 plt.figure(figsize = (10,6.6))
@@ -98,7 +99,7 @@ plt.hlines(0, N[0], N[-1], linestyles = 'dashed', label = '95% goal')
 plt.xlabel('Sample size', fontsize = 15)
 plt.ylabel('$\sqrt{N}$Bias', fontsize = 15)
 plt.title('$\sqrt{N}$bias convergence of various DR estimators', fontsize = 15)
-plt.savefig('../figures/sqrtnRF.png')
+plt.savefig('../figures/sqrtnMLP.png')
 plt.show()
 
 
@@ -136,6 +137,6 @@ ax[1,0].set_ylabel('Count', fontsize = 15)
 ax[1,0].vlines(B_true, 0, 120,label = 'True mean')
 
 fig.legend()
-fig.suptitle(r'Histograms of estimates for sample size $N = $' + str(N[-1]), fontsize = 15)
-plt.savefig('../figures/histRF.png')
+fig.suptitle(r'Histograms of estimates for sample size $N = $'+str(N[-1]), fontsize = 15)
+plt.savefig('../figures/histMLP.png')
 plt.show()
