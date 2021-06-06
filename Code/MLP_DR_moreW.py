@@ -110,7 +110,7 @@ ax[0,0].hist(estimates[2,:,-1],bins = np.linspace(min(estimates[2,:,-1]),
 ax[0,0].set_title(labels[2])
 ax[0,0].set_xlabel('Estimate value', fontsize = 15)
 ax[0,0].set_ylabel('Count', fontsize = 15)
-ax[0,0].vlines(B_true, 0, 120)
+ax[0,0].vlines(B_true, 0, 300)
 
 ax[0,1].hist(estimates[7,:,-1],bins = np.linspace(min(estimates[7,:,-1]),
                                            max(estimates[7,:,-1]),
@@ -118,7 +118,7 @@ ax[0,1].hist(estimates[7,:,-1],bins = np.linspace(min(estimates[7,:,-1]),
 ax[0,1].set_title(labels[7])
 ax[0,1].set_xlabel('Estimate value', fontsize = 15)
 ax[0,1].set_ylabel('Count', fontsize = 15)
-ax[0,1].vlines(B_true, 0, 120)
+ax[0,1].vlines(B_true, 0, 300)
 
 ax[1,1].hist(estimates[6,:,-1],bins = np.linspace(min(estimates[6,:,-1]),
                                            max(estimates[6,:,-1]),
@@ -126,7 +126,7 @@ ax[1,1].hist(estimates[6,:,-1],bins = np.linspace(min(estimates[6,:,-1]),
 ax[1,1].set_title(labels[6])
 ax[1,1].set_xlabel('Estimate value', fontsize = 15)
 ax[1,1].set_ylabel('Count', fontsize = 15)
-ax[1,1].vlines(B_true, 0, 120)
+ax[1,1].vlines(B_true, 0, 300)
 
 ax[1,0].hist(estimates[5,:,-1],bins = np.linspace(min(estimates[5,:,-1]),
                                            max(estimates[5,:,-1]),
@@ -134,7 +134,7 @@ ax[1,0].hist(estimates[5,:,-1],bins = np.linspace(min(estimates[5,:,-1]),
 ax[1,0].set_title(labels[5])
 ax[1,0].set_xlabel('Estimate value', fontsize = 15)
 ax[1,0].set_ylabel('Count', fontsize = 15)
-ax[1,0].vlines(B_true, 0, 120,label = 'True mean')
+ax[1,0].vlines(B_true, 0, 300,label = 'True mean')
 
 fig.legend()
 fig.suptitle(r'Histograms of estimates for sample size $N = $'+str(N[-1]), fontsize = 15)
