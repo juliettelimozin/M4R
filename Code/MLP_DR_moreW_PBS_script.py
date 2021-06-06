@@ -24,13 +24,13 @@ Y = np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.mult
 
 B_true = np.mean(expit(0.2-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)))
 
-N = int(os.getenv('PBS_ARRAYID'))
+N = 1000
 random.seed(N+1234)
 iters = 2500
 
-estimates = np.zeros((9,iters))
-CI = np.zeros((9,iters))
-SEs = np.zeros((9,iters))
+estimates = np.load('estimates_MLP_moreW_'+str(N)+'.npy')
+CI = np.load('CI_MLP_moreW_'+str(N)+'.npy')
+SEs = np.load('SEs_MLP_moreW_'+str(N)+'.npy')
 for i in range(iters):
     W1 = np.random.uniform(-2,2,N)
     W2 = np.random.binomial(1,0.5,N)
@@ -44,19 +44,19 @@ for i in range(iters):
     W_r[:,1] = W1*W2
     W_r[:,3] = W3*W4
     
-    ps_log = LogisticRegression().fit(W_r,A).predict_proba(W_r)[:,1]
-    ps_f = MLP_crossval(W_r, A, W_r)
-    ps_w_log = LogisticRegression().fit(W,A).predict_proba(W)[:,1]
-    ps_w_f = MLP_crossval(W, A, W)
-    ps_r = expit(-W1 + 2*np.multiply(W1,W2))
+    #ps_log = LogisticRegression().fit(W_r,A).predict_proba(W_r)[:,1]
+    #ps_f = MLP_crossval(W_r, A, W_r)
+    #ps_w_log = LogisticRegression().fit(W,A).predict_proba(W)[:,1]
+    #ps_w_f = MLP_crossval(W, A, W)
+    ps_r = expit(-W1 + 2*np.multiply(W1,W2)- W3 + 2*np.multiply(W3,W4))
     
-    om_log = LogisticRegression().fit(W_r[A==1],Y[A==1]).predict_proba(W_r)[:,1]
-    om_f = MLP_crossval(W_r[A==1], Y[A==1], W_r)
-    om_w_log = LogisticRegression().fit(W[A==1],Y[A==1]).predict_proba(W)[:,1]
-    om_w_f = MLP_crossval(W[A==1],Y[A==1], W)
-    om_r = expit(0.2-W1 + 2*np.multiply(W1,W2))
+    #om_log = LogisticRegression().fit(W_r[A==1],Y[A==1]).predict_proba(W_r)[:,1]
+    #om_f = MLP_crossval(W_r[A==1], Y[A==1], W_r)
+    #om_w_log = LogisticRegression().fit(W[A==1],Y[A==1]).predict_proba(W)[:,1]
+    #om_w_f = MLP_crossval(W[A==1],Y[A==1], W)
+    om_r = expit(0.2-W1 + 2*np.multiply(W1,W2)- W3 + 2*np.multiply(W3,W4))
     
-    
+    '''
     DR_l_f_om, se_l_f_om = DR_estimator(Y, W, A).fit_regression(ps = ps_log,om = om_f).estimate()
     DR_l_f_ps, se_l_f_ps =  DR_estimator(Y, W, A).fit_regression(ps = ps_f,om = om_log).estimate()
     DR_f_r, se_f_r = DR_estimator(Y, W, A).fit_regression(ps = ps_f,om = om_f).estimate()
@@ -65,8 +65,10 @@ for i in range(iters):
     DR_f_om, se_f_om = DR_estimator(Y, W, A).fit_regression(ps = ps_f,om = om_w_f).estimate()
     DR_f_ps, se_f_ps = DR_estimator(Y, W, A).fit_regression(ps = ps_w_f,om = om_f).estimate()
     DR_f_w, se_f_w = DR_estimator(Y, W, A).fit_regression(ps = ps_w_f,om = om_w_f).estimate()
+    '''
     DR_r, se_r = DR_estimator(Y, W, A).fit_regression(ps = ps_r,om = om_r).estimate()
     
+    '''
     estimates[0,i] = DR_l_f_om
     estimates[1,i] = DR_l_f_ps
     estimates[2,i] = DR_f_r
@@ -75,8 +77,10 @@ for i in range(iters):
     estimates[5,i] = DR_f_om
     estimates[6,i] = DR_f_ps
     estimates[7,i] = DR_f_w
+    '''
     estimates[8,i]  = DR_r
-
+    
+    '''
     SEs[0,i] = se_l_f_om
     SEs[1,i] = se_l_f_ps
     SEs[2,i] = se_f_r
@@ -85,11 +89,12 @@ for i in range(iters):
     SEs[5,i] = se_f_om
     SEs[6,i] = se_f_ps
     SEs[7,i] = se_f_w
+    '''
     SEs[8,i] = se_r
     
     tval = 1.96
     
-    for k in range(9):
+    for k in range(8,9):
         if estimates[k,i] - tval*SEs[k,i] <= B_true <= estimates[k,i] + tval*SEs[k,i]:
             CI[k,i] = 1
         else:
