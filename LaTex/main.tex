@@ -39,8 +39,7 @@
 \setlength{\parindent}{5ex}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\todo[inline]{to do once I have all results}
-
+Doubly-robust estimation is a method for estimating the outcome mean of a data set missin at random. This estimator is based on predictive models of the outcome distribution and the propensity score. If at least one of these models is correctly specified, the doubly-robust estimator is consistent for the true outcome mean. Traditionally, parametric approaches are used for setting these nuisance parameter models, but in practice a misspecification is likely to occur. We illustrated, instead, the use of Machine Learning tools for nuisance parameter model setting, specifically Random Forests and Multi-Layer Perceptrons. In the simulations we ran on specific data sets, we empirically found that these methods often provide $N^{-1/2}$-consistent DR estimators and hence provide more degrees of freedom for correct model specification, although popular 'off the shelf' methods for choosing the learning hyperparameters of these ML algorithms failed to provide CI construction with nominal coverage, and bias convergence rates could be further improved. The findings in this report highlight the potential of ML approaches for improving performance and robustness of DR estimation, but also the need for a deeper understanding and study of model selection and hyperparameter tuning to achieve higher rates of convergence that would improve DR estimation performance.
 
 \end{abstract}
 
@@ -324,7 +323,7 @@ RFs are a beginner-friendly ML tool that create a classification or regression m
     \label{fig:my_label}
 \end{figure}
 
-\todo[inline]{More explanation on RF}
+
 
 \subsubsection{RF simulation 1: 2 features}
 
@@ -353,7 +352,7 @@ Each time an RF is specified, it goes through a stratified 5-fold cross validati
  600, 800, 1000& 10, 15, 20, 25, 30 & 1, 2 \\
  \hline 
 \end{tabular}
-\caption{Parameter grid of 5-fold cross-validation for RFs in simulation 1}
+\caption{Parameter grid of 5-fold cross-validation for RFs in 2-feature simulation}
 \label{tableRF}
 \end{table}
 
@@ -361,18 +360,17 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
 
 \subsubsection*{Results}
 
-\todo[inline]{missing sample size N = 1200, 1400}
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasRF.png}
-    \caption{RF simulation 1 results of bias for the various DR estimator specifications}
+    \caption{RF 2-feature simulation results of bias for the various DR estimator specifications}
     \label{figbiasRF}
 \end{figure}
 
 \begin{figure} 
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF.png}
-    \caption{RF simulation 1 results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \caption{RF 2-feature simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnRF}
 \end{figure}
 
@@ -387,7 +385,7 @@ As for the CI coverage results of the various DR estimations in figure \ref{figC
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIRF.png}
-    \caption{RF simulation 1 results of 95\% CIs coverage for the various DR estimator specifications}
+    \caption{RF 2-feature simulation results of 95\% CIs coverage for the various DR estimator specifications}
     \label{figCIRF}
 \end{figure}
 
@@ -398,14 +396,14 @@ Overall the use of RFs in this data set has resulted in consistent DR estimates 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SERF.png}
-    \caption{RF simulation 1's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{RF 2-feature simulation's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSERF}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histRF.png}
-    \caption{RF simulation 1's histograms of DR estimates for sample size $N = 1200$}
+    \caption{RF 2-feature simulation's histograms of DR estimates for sample size $N = 1200$}
     \label{fighistRF}
 \end{figure}
 
@@ -422,24 +420,25 @@ and the new true outcome model is
     & = \expit(0.2 - w_1 + 2w_1w_2 - w_3 + 2w_3w_4)
 \end{align*}
 
-We ran simulations using the same combination of nuisance parameter model settings as in simulation 1 with 2 features, but this time when we refer to misspecified specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the RFs was also expanded to consider up to 4 features at a time in each split. 
+Note that the true outcome mean $\beta$ remains approximately the same at 0.53 despite the added features.
+
+We ran simulations using the same combination of nuisance parameter model settings as in the 2-feature simulation, but this time when we refer to misspecified specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the RFs was also expanded to consider up to 4 features at a time in each split. 
 
 \subsubsection*{Results}
 
-\todo[inline]{missing sample size N = 1400}
 Unlike the simulation with 2 features, this time with the addition of 2 new features we obtained estimates that had poor convergence rates. Figure \ref{figbiasRF_moreW} already suggests higher bias in the estimators and deceleration of the bias rate of convergence compared to the simulation with 2 features. This is further illustrated in figure \ref{figsqrtnRF_moreW} as the divergence of the bias elevated to $N^{1/2}$ suggest that the rate of convergence to 0 is slower than $N^{-1/2}$. The only estimator that performed well in this setting, based on the sample sizes considered, is the estimator with a correct logistic outcome model and an RF propensity score model that accounts for the interactions terms (orange line in the plots). 
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasRF_moreW.png}
-    \caption{RF simulation 2 results of bias for the various DR estimator specifications}
+    \caption{RF 4-feature simulation results of bias for the various DR estimator specifications}
     \label{figbiasRF_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnRF_moreW.png}
-    \caption{RF simulation 2 results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \caption{RF 4-feature simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnRF_moreW}
 \end{figure}
 
@@ -448,14 +447,14 @@ Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figu
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIRF_moreW.png}
-    \caption{RF simulation 2 results of 95\% CIs coverage for the various DR estimator specifications}
+    \caption{RF 4-feature simulation results of 95\% CIs coverage for the various DR estimator specifications}
     \label{figCIRF_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SERF_moreW.png}
-    \caption{RF simulation 2's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{RF 4-feature simulation's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSERF_moreW}
 \end{figure}
 
@@ -464,7 +463,7 @@ It is with no surprise that due to the slowness of the convergences, a normal di
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histRF_moreW.png}
-    \caption{RF simulation 2's histograms of DR estimates for sample size $N = 1200$}
+    \caption{RF 4-feature simulation's histograms of DR estimates for sample size $N = 1200$}
     \label{fighistRF_moreW}
 \end{figure}
 
@@ -513,7 +512,7 @@ Like with RFs, the MLPs also go through a 5-fold cross-validation process to tun
  3 layers of size (10, 20, 30), 2 layers of size (50, 50), 1 layer of size 100 & Constant, invscaling, adaptive & Logistic, relu, tanh & $10^{-1}$, $10^{-2}$, $10^{-3}$, $10^{-4}$ \\
  \hline 
 \end{tabular}
-\caption{Parameter grid of 5-fold cross-validation for MLPs in simulation 1}
+\caption{Parameter grid of 5-fold cross-validation for MLPs in 2-feature simulation}
 \label{tableMLP}
 \end{table}
 
@@ -522,14 +521,14 @@ Like with RFs, the MLPs also go through a 5-fold cross-validation process to tun
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasMLP.png}
-    \caption{MLP simulation 1 results of bias for the various DR estimator specifications}
+    \caption{MLP 2-feature simulation results of bias for the various DR estimator specifications}
     \label{figbiasMLP}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnMLP.png}
-    \caption{MLP simulation 1 results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \caption{MLP 2-feature simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnMLP}
 \end{figure}
 
@@ -538,7 +537,7 @@ In figure \ref{figbiasMLP} we notice that most estimates involving at least one 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIMLP.png}
-    \caption{MLP simulation 1 results of 95\% CIs coverage for the various DR estimator specifications}
+    \caption{MLP 2-feature simulation results of 95\% CIs coverage for the various DR estimator specifications}
     \label{figCIMLP}
 \end{figure}
 
@@ -547,7 +546,7 @@ The CI coverage plot in figure \ref{figCIMLP} also shows interesting results. \t
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SEMLP.png}
-    \caption{MLP simulation 1's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{MLP 2-feature simulation's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSEMLP}
 \end{figure}
 
@@ -556,7 +555,7 @@ Taking a particular look at the histograms of the DR estimates involving only ML
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histMLP.png}
-    \caption{MLP simulation 1's histograms of DR estimates for sample size $N = 1400$}
+    \caption{MLP 2-feature simulation's histograms of DR estimates for sample size $N = 1400$}
     \label{fighistMLP}
 \end{figure}
 
@@ -565,21 +564,21 @@ Taking a particular look at the histograms of the DR estimates involving only ML
 
 Like in the second RF simulation from section \ref{RF simu 2}, we now wish to illustrate the efficacy of MLPs in the DR estimations from section \ref{MLP simu 1}, with two features $W_3, W_4$ added to the previous simulation's data. The distributions of $W_1,..., W_4$ haven't changed from section \ref{RF simu 2}. We also maintain the same cross-validation grid from the first MLP simulation in section \ref{MLP simu 1}. As in section \ref{RF simu 2}, when we refer to a misspecified nuisance parameter model, we mean that both the interactions between $W_1, W_2$ and $W_3, W_4$ are not accounted for in the feature engineering of the model.
 
-\textit{The author apologises for the lack of data points at sample sizes $N = 600, 800$, as they ran into computational issues for these particular sample sizes that could not be fixed in time.}
+\textit{The author apologises for the lack of data points at sample sizes $N = 800, 1200$, as they ran into computational issues for these particular sample sizes that could not be fixed in time.}
 
 \subsubsection*{Results}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasMLP_moreW.png}
-    \caption{MLP simulation 2 results of bias for the various DR estimator specifications}
+    \caption{MLP 4-feature simulation results of bias for the various DR estimator specifications}
     \label{figbiasMLP_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnMLP_moreW.png}
-    \caption{MLP simulation 2 results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \caption{MLP 4-feature simulation results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnMLP_moreW}
 \end{figure}
 
@@ -588,14 +587,14 @@ With the added complexity from having 4 features, the DR estimates involving MLP
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIMLP_moreW.png}
-    \caption{MLP simulation 2 results of 95\% CIs coverage for the various DR estimator specifications}
+    \caption{MLP 4-feature simulation results of 95\% CIs coverage for the various DR estimator specifications}
     \label{figCIMLP_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SEMLP_moreW.png}
-    \caption{MLP simulation 2's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{MLP 4-feature simulation's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSEMLP_moreW}
 \end{figure}
 
@@ -604,16 +603,15 @@ As for CI coverage performance, figure \ref{figCIMLP_moreW} suggests that the DR
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histMLP_moreW.png}
-    \caption{MLP simulation 2's histograms of DR estimates for sample size $N = 1200$}
+    \caption{MLP 4-feature simulation's histograms of DR estimates for sample size $N = 1200$}
     \label{fighistMLP_moreW}
 \end{figure}
 
-Due to its lower bias, \texttt{DR MLP} has the most centred histogram at a high sample size compared to the other 3 DR estimates involving only MLPs, as seen in figure \ref{fighistMLP_moreW}. \texttt{DR mis. MLP ps & om}, having the highest bias, has a histogram of values that is heavily skewed to the right. It is also the case for the DR estimates with one misspecified MLP, but we expect these to become more centred at the true mean as we increase the sample size.
+Due to its lower bias, \texttt{DR MLP} has the most centred histogram at a high sample size compared to the other 3 DR estimates involving only MLPs, as seen in figure \ref{fighistMLP_moreW}. \texttt{DR mis. MLP ps \& om}, having the highest bias, has a histogram of values that is heavily skewed to the right. It is also the case for the DR estimates with one misspecified MLP, but we expect these to become more centred at the true mean as we increase the sample size.
 
 Overall, the complexity from having doubled the number of features relatively did not penalise MLPs too much in terms of their convergence to the true nuisance parameters, which has led to DR estimates that, although having higher bias and lower CI coverage, still show signs of converging to the true mean at a slower rate than the 2 feature case.
 \clearpage
 \subsection{Discussion}
-\todo[inline]{missing sample size N = 1200}
 
 \subsubsection{2-feature case} \label{2 features}
 
@@ -636,7 +634,7 @@ Figure \ref{biascompare} and \ref{sqrtncompare} suggests that in the 2-feature c
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIcompare.png}
-    \caption{Caption}
+    \caption{Comparing CI coverage performance for RFs vs MLPs on simulation with 2 features}
     \label{CIcompare}
 \end{figure}
  
@@ -649,14 +647,14 @@ To summarise, when choosing between RFs and MLPs for nuisance parameter model se
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biascompare_moreW.png}
-    \caption{Comparing bias performance on simulation with 2 features}
+    \caption{Comparing bias performance on simulation with 4 features}
     \label{biascompare_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtncompare_moreW.png}
-    \caption{Caption}
+    \caption{Comparing $\sqrt{N}$bias performance on simulations with 4 features}
     \label{sqrtncompare_moreW}
 \end{figure}
 
@@ -665,13 +663,13 @@ We had shown in the previous sections that RFs struggled to converge rapidly eno
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIcompare_moreW.png}
-    \caption{Caption}
+    \caption{Comparing CI coverage performance for RFs vs MLPs on simulation with 2 features}
     \label{CIcompare_moreW}
 \end{figure}
 
 As for CI coverage performance, we can clearly see in figure \ref{CIcompare_moreW} that the DR estimators with RFs fail to reach nominal CI coverage, and the latter are even seeming to converge to 0\%. DR estimators involving at least one correct MLP specification, on the other hand, have CI coverage slowly converging to the 95\% goal.
 
-To summarise, in the 4-feature case, nuisance parameter models based on RFs had slower convergence rate to the true nuisance parameters compared to MLPs, which resulted DR estimates with higher bias and poor to nonexistent CI coverage. Models based on MLPs were however not as penalised by the addition of features and provided $\sqrt{N}$-consistent DR estimates with high but converging bias and CIs converging to the nominal coverage, although at a slow rate.
+To summarise, in the 4-feature case, nuisance parameter models based on RFs had slower convergence rate to the true nuisance parameters compared to MLPs, which resulted DR estimates with higher bias and poor to nonexistent CI coverage. Models based on MLPs were however not as penalised by the addition of features and provided $N^{-1/2}$-consistent DR estimates with high but converging bias and CIs converging to the nominal coverage, although at a slow rate.
 
 \subsubsection{Limitations}
 
