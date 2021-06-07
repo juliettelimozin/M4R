@@ -24,7 +24,7 @@ Y = np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.mult
 
 B_true = np.mean(expit(0.2-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)))
 iters = 2500
-N = [200,400,1000]
+N = [200,400,600,1000]
 
 estimates = np.zeros((9,iters,len(N)))
 CI = 1.0*estimates

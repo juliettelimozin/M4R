@@ -24,7 +24,7 @@ Y = np.random.binomial(1, expit(0.2*A-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.mult
 
 B_true = np.mean(expit(0.2-W1 + 2*np.multiply(W1,W2) - W3 + 2*np.multiply(W3,W4)))
 
-N = 1000
+N = 600
 random.seed(N+1234)
 iters = 2500
 
