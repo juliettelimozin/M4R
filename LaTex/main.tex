@@ -76,9 +76,9 @@ Missing data is a common issue encountered in Statistics, and can have a signifi
 
 Many bias-minimising strategies exist for estimating the mean outcome value. The most efficient method consists of fitting predictive models of the nuisance parameters, i.e. the outcome distribution and the probability of observing the outcome given the feature data (referred to as propensity score), and using the fitted values as part of the outcome mean calculation. Such a way of estimating the outcome mean is called the augmented inverse probability weighting (AIPW) approach, often referred to as doubly-robust (DR) estimation. This approach has been popularised in many fields, as it provides the user two chances of maintaining consistency, as only one of the two predictive models needs to be correctly specified. The art of specifying these models, however, is the biggest challenge one has to face when using DR estimation. We wish to consider models of the nuisance parameters that are not only accurate but also provide a DR estimate whose bias converges to 0 at a rate faster than that of $N^{-1/2}$ ($N$ being the sample size), which is generally the rate of convergence to the true value that we aim for in statistical literature.
 
-Traditionally, parametric models are used to predict the outcome and the propensity score. As parametric models form a family of probability distributions, their parameter range is finite and they provide useful theoretical backings such as the ability to infer on asymptotic distributions and confidence intervals (CIs). However a slight misspecification can lead to biased estimates. In recent years, developments in data-adaptive non-parametric tools have made Machine Learning (ML) approaches more attractive in model setting. The main question we wish to answer in this report is whether these ML tools provide an advantage over the parametric methods for correctly specifying nuisance parameter models in DR estimation, whilst maintaining low bias and nominal CI coverage.
+Traditionally, parametric models are used to predict the outcome and the propensity score. As parametric models form a family of probability distributions, their parameter range is finite and they provide useful theoretical backings such as the ability to infer asymptotic distributions and confidence intervals (CIs). However, slight misspecification can lead to biased estimates. In recent years, developments in data-adaptive non-parametric tools have made Machine Learning (ML) approaches more attractive in the model setting. The main question we wish to answer in this report is whether these ML tools provide an advantage over the parametric methods for correctly specifying nuisance parameter models in DR estimation, whilst maintaining low bias and nominal CI coverage.
  
-In this report we will illustrate the use of DR estimation, starting with a parametric setting that includes DR estimates with one or more misspecified models. We will then move towards flexible nonparametric methods, notably Random Forests (RFs) and Multilayer Perceptrons (MLPs), to identify if they provide improved inference while still maintaining consistent estimation. As we shall demonstrate in section 3, parametric models are likely to be misspecified in practice and the misspecification leads to highly biased estimators with CIs not containing the true value as sample sizes increase. In section 4, we suggest that flexible nonparametric methods such as RFs and MLPs give good DR estimator bias performance as they provide more degrees of freedom to get a correct specification of the nuisance parameter models. However they have difficulty reaching a high convergence rate of the bias, and CIs constructed using nuisance parameter models-based SE estimation as suggested by \cite{davidian} also lead non-optimal rate of convergence to high coverage. \cite{benkeser2017} have proposed alternative correction procedures to provide DR estimators with almost-nominal CI coverage. However, the results presented in this report suggest that more research must be conducted on how to optimise hyperparameter tuning (the selection of the parameters of a ML model used to control its learning process) of such nonparametric methods in order reduce DR estimation bias with higher convergence rate.
+In this report we will illustrate the use of DR estimation, starting with a parametric setting that includes DR estimates with one or more misspecified models. We will then move towards flexible nonparametric methods, notably Random Forests (RFs) and Multilayer Perceptrons (MLPs), to identify if they provide improved inference while still maintaining consistent estimation. As we shall demonstrate in section 3, parametric models are likely to be misspecified in practice and the misspecification leads to highly biased estimators with CIs not containing the true value as sample sizes increase. In section 4, we suggest that flexible nonparametric methods such as RFs and MLPs give good DR estimator bias performance as they provide more degrees of freedom to get a correct specification of the nuisance parameter models. However they have difficulty reaching a high convergence rate of the bias, and CIs constructed using nuisance parameter models-based SE estimation as suggested by \cite{davidian} also lead non-optimal rate of convergence to high coverage. \cite{benkeser2017} have proposed alternative correction procedures to provide DR estimators with almost-nominal CI coverage. However, the results presented in this report suggest that more research must be conducted on how to optimise hyperparameter tuning (the selection of the parameters of a ML model used to control its learning process) of such nonparametric methods to reduce DR estimation bias with higher convergence rate.
 
 
 \section{Setting} 
@@ -91,7 +91,7 @@ To summarise:
     \item $\mathbf{R}$: indicator on whether $Y$ is observed or not ($R = 1$: observed, $R = 0$: missing) 
 \end{itemize}
 
-The outcome is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}, i.e $P(R=r|\mathbf{W}, Y) = P(R= r|\mathbf{W})$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y|\mathbf{W})$. So in the example of a clinical trial, we would consider the data set obtained from the study to be MAR if given the measurements taken from the patients, the reasons why some patients dropped out were unrelated to the outcome of the trial. The MAR setting will therefore have effects on any statistical inference we may perform on this data set.
+The outcome is said to be \textbf{missing at random (MAR)} if the conditional probability that a particular missingness pattern occurs given the data is independent of the missing values in that pattern \citep{vansteelandt}, i.e $P(R=r|\mathbf{W}, Y) = P(R= r|\mathbf{W})$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y|\mathbf{W})$. So in the example of a clinical trial, we would consider the data set obtained from the study to be MAR if, given the measurements taken from the patients, the reasons why some patients dropped out were unrelated to the outcome of the trial. The MAR setting will therefore have effects on any statistical inference we may perform on this data set.
 
 When the missingness pattern is independent of both the auxiliary variables and the outcome data, the data set is said to be \textbf{missing completely at random (MCAR)}, i.e. $P(R=r|\mathbf{W}, Y) = P(R = r)$ and  $P(Y=y|\mathbf{W}, R) = P(Y=y)$. Hence any estimation on the outcome data is unbiased, but a data set is, in practice, rarely MCAR.\\
 
@@ -119,7 +119,7 @@ In practice, the propensity score $\pi(\mathbf{W})$ is unknown, so we predict th
 
 If the propensity score model $\hat\pi(\mathbf{W}; \boldsymbol\alpha)$ is correctly specified, by the weak law of large numbers (WLLN), $\hat{\beta}_{IPW}$ will converge in probability to the true mean $\beta$, so this makes the IPW estimate consistent for $\beta$ \citep{davidian}. Using the Central Limit Theorem (CLT), we have $\sqrt{N}(\hat{\beta}_{IPW}-\beta) \xrightarrow{d} \mathcal{N}(0,\sigma^2)$. In practice since we do not know $\sigma^2$ we use the estimated outcome variance $\hat\sigma$ (often a sample-based estimator), to be able to perform inference tests and CIs for the true mean.
 
-A drawback from the IPW estimator in equation \ref{IPW_est} is that it is usually difficult to construct a propensity score model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size $N$ is large enough, so a removal of bias is not guaranteed by the IPW estimator when the model is misspecified. Another problem that arises is unstable weights: due to practical positivity violations, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a small subgroup of the sample data that has rarely been observed, so the IPW estimator is mainly dominated by these large weights \citep{seaman}. \cite{petersen} have proposed various methods for responding to practical positivity violations, notably for inference based on the IPW approach.
+A drawback from the IPW estimator in equation \ref{IPW_est} is that it is usually difficult to construct a propensity score model unless the auxiliary variables $\mathbf{W}$ are categorical or the sample size $N$ is large enough, so removal of bias is not guaranteed by the IPW estimator when the model is misspecified. Another problem that arises is unstable weights: due to practical positivity violations, the fitted probability of observing an outcome given the auxiliary variables may be very small for the majority of individuals, and very large for a small subgroup of the sample data that has rarely been observed, so the IPW estimator is mainly dominated by these large weights \citep{seaman}. \cite{petersen} have proposed various methods for responding to practical positivity violations, notably for inference based on the IPW approach.
 
 \citet{kang} suggest that the model being misspecified is more likely the cause of large weights, rather than if the auxiliary variables are truly predictive of whether the outcome may be missing or not. There exist a few tests, including the \citet{hosmer} test, to detect poor fit of the propensity score model.\\
 
@@ -150,7 +150,7 @@ This is called an AIPW as it is the sum of the IPW estimator and an augmentation
     \hat\beta_{DR} = \frac{1}{N}\sum_{i=1}^{N}\frac{R_iY_i}{\hat \pi(\mathbf{W}_i, \hat{\alpha})} + \frac{1}{N}\sum_{i=1}^{N} \left(1 - \frac{R_i}{\hat\pi(\mathbf{W_i},\hat{\alpha})} \right) \hat m(\mathbf{W}_i, \hat\gamma)
 \end{equation}
 
-The estimator $\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{DR estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome ans missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{bangrobins,vansteelandt}.
+The estimator $\hat\beta_{DR}$ is consistent (i.e $\hat\beta_{DR}$ converges in probability to the true mean $\beta$) and asymptotically normal when either the propensity score or outcome model are correctly specified, as the correct specification of one suffices for consistency, and therefore the CLT to hold for $\hat\beta_{DR}$, which is why we call this a \textbf{DR estimator} for $\beta$. This allows us to not require a correct specification for the entire outcome and missingness distributions whilst maintaining a better efficiency than IPW estimators \citep{bangrobins,vansteelandt}.
 
 For example, DR estimators are used to estimate the mean of clinical trial outcome when there have been dropouts mid-trial; we use acquired variables/observations on patients to compute a DR estimation of the mean. \\
 
@@ -194,7 +194,7 @@ Thus we have shown that when at least one of the two models is correctly specifi
 
 In standard parametric DR estimation, it is fairly common to define the propensity score and outcome models as logistic or linear regression models. These methods are user-friendly and fairly easy to understand and compute, as many pre-made functions are available in coding languages. They also offer theoretical backing that would allow us to make statistical inference.\\
 
-Although this version of the DR estimator that these models lead to has been established as the usual estimator, \cite{kang} have shown it performs poorly when either the propensity scoreor both models are misspecified, i.e when the distribution assumptions tied with linear or logistic regression do not apply to the actual distribution of the outcome. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
+Although this version of the DR estimator that these models lead to has been established as the usual estimator, \cite{kang} have shown it performs poorly when either the propensity score or both models are misspecified, i.e when the distribution assumptions tied with linear or logistic regression do not apply to the actual distribution of the outcome. This gives no guarantee that $\hat\beta_{DR}$ is at least as efficient as the IPW estimator, which we were seeking to improve on.
 
 Another issue with parametric DR estimators is that $\hat\beta_{DR}$ may be outside the range of the observed $\mathbf{Y}$ values; it could lie below or above the minimum or maximum value of $Y$, which would not be useful. This is especially true when we may have binary outcome \citep{vansteelandt}.
 
@@ -223,12 +223,12 @@ From there we calculated four parametric DR estimates:
     \item \texttt{DR exact specification}, where both models are correctly specified using the exact formulas above;
     \item \texttt{DR mis. outcome model}, where the outcome model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit;
     \item \texttt{DR mis. propensity score}, where the propensity score model is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit.
-    \item \texttt{DR misspecified}, where both the propensity score model and  is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit.
+    \item \texttt{DR misspecified}, where both the propensity score model and is incorrectly specified by not accounting for the interaction term between $W_1, W_2$ in the logistic regression fit.
 \end{itemize}
 
 For each estimate we considered sample sizes $N = 200, 400, 600, ..., 2000$ and for each N we calculated the empirical bias of the estimators over 2500 generated data sets, as well as the empirical coverage of the 95\% CIs and accuracy of the standard error (SE) estimation from \citet{lunceford_davidian}.
 
-By using properties of iterated expetations, we have
+By using properties of iterated expectations, we have
 
 \begin{align*}
     E(Y|R = 1) &= P(Y = 1|R = 1)\\
@@ -243,11 +243,11 @@ By using properties of iterated expetations, we have
     & = \int_{-2}^{2} \frac{1}{8}[\expit(0.2 - w_1)\expit(-w_1) +\expit(0.2 + w_1)\expit(w_1)]dw_1 \\
 \end{align*}
 
-By calculating the above integral numerically, we get that the true mean, had all outcome variables $Y_i$ been accounted for, is about 0.53.
+By calculating the above integral numerically, we get that the true mean is about 0.53, if we had accounted for all outcome variables $Y_i$.
 
 For calculating the CIs, we set the model-based sample error estimates to be 
 \begin{align*}
-    \hat{SE} = n^{-1} \sqrt{\sum_{i=1}^N \left(\frac{R_i(Y_i - \hat m(\mathbf{W}_i), \hat \gamma)}{\hat\pi(\mathbf{W}_i,\hat\alpha)} + \hat m(\mathbf{W}_i) - \hat{\beta}_{DR}\right)^2}
+    \hat{SE} = n^{-1} \sqrt{\sum_{i=1}^N \left(\frac{R_i(Y_i - \hat m(\mathbf{W}_i), \hat \gamma)}{\hat\pi(\mathbf{W}_i,\hat\alpha)} + \hat m(\mathbf{W}_i) - \hat{\beta}_{DR}\right)^2}  
 \end{align*}
 from \citet{lunceford_davidian}. \\
 
@@ -267,7 +267,7 @@ from \citet{lunceford_davidian}. \\
     \label{figsqrtnpara}
 \end{figure}
 
-Figure \ref{figbiaspara} suggests that the DR estimators with at least one correct specification of the nuisance parameter estimates are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $N^{-1/2}$. We also notice that the DR estimation with misspecified propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}. As expected, we also observe poor bias from the DR estimator with both nuisance parameter estimates misspecified, with a diverging $\sqrt{N}$bias curve, confirming that the misspecification of both parameters leads to inconsistent DR estimator.
+Figure \ref{figbiaspara} suggests that the DR estimators with at least one correct specification of the nuisance parameter estimates are indeed consistent as the biases converge to 0 as the sample sizes $N$ get larger -- this is further illustrated in figure \ref{figsqrtnpara}, as we notice that the rates of convergence of the biases are faster than that of $N^{-1/2}$. We also notice that the DR estimation with misspecified propensity score has the poorest convergence out of the 4 estimations, which is in line with the inefficiency that was suggested for such specifications by \citet{kang}. As expected, we also observe poor bias from the DR estimator with both nuisance parameter estimates misspecified, with a diverging $\sqrt{N}$bias curve, confirming that the misspecification of both parameters leads to an inconsistent DR estimator.
 
 \begin{figure}[h!]
     \centering
@@ -283,9 +283,9 @@ Figure \ref{figbiaspara} suggests that the DR estimators with at least one corre
     \label{figSEpara}
 \end{figure}
 
-Figure \ref{figCIpara} shows the empirical coverage of the 95\% CIs of each estimations, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the SE was specifically for correctly specified model, the coverage for the DR estimations with one misspecified nuisance parameter model are either too high or too low. To get a better estimation of the SE, one could try other non-model based methods such as bootstrapping, which calculates an estimate of the sample variance based on random samples of the DR estimates. On the flip-side, we notice that for the misspecified DR estimator, as expected the coverage of its CIs converge rapidly to 0, i.e. the CIs based on this misspecified estimator eventually do not contain the true value $\beta$.
+Figure \ref{figCIpara} shows the empirical coverage of the 95\% CIs of each estimation, which indeed converge to 95\% for the correctly specified DR estimations. Because the estimation of the SE was specifically for a correctly specified model, the coverage for the DR estimations with one misspecified nuisance parameter model is either too high or too low. To get a better estimation of the SE, one could try other non-model based methods such as bootstrapping, which calculates an estimate of the sample variance based on random samples of the DR estimates. On the flip-side, we notice that for the misspecified DR estimator, as expected the coverage of its CIs converges rapidly to 0, i.e. the CIs based on this misspecified estimator eventually do not contain the true value $\beta$.
 
-Figure \ref{figSEpara} confirms the results we saw above, as we see the ratio of the standard deviation of the DR estimates to the average SE estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the CI bounds. As for the DR estimations with one misspecified model, this ratio is above or below 1 for \texttt{DR mis. propensity score} and \texttt{DR mis. outcome model} respectively. This indicates that the SE estimation we used is positively or negatively biased, hence giving a CI coverage that is too low for the DR estimator with misspecified outcome model, or too high for the DR estimator with misspecified propensity score model. As for the standard deviation to mean SE estimate ratio for the misspecified DR estimator, since the SE estimation is based on correctly specified nuisance parameter estimates, it is to no surprise that it is inconsistent in this case, so the ratio diverges.
+Figure \ref{figSEpara} confirms the results we saw above, as we see the ratio of the standard deviation of the DR estimates to the average SE estimator is close to 1 for correctly specified models, hence suggesting a correct calculation of the CI bounds. As for the DR estimations with one misspecified model, this ratio is above or below 1 for \texttt{DR mis. propensity score} and \texttt{DR mis. outcome model} respectively. This indicates that the SE estimation we used is positively or negatively biased, hence giving a CI coverage that is too low for the DR estimator with a misspecified outcome model, or too high for the DR estimator with a misspecified propensity score model. As for the standard deviation to mean SE estimate ratio for the misspecified DR estimator, since the SE estimation is based on correctly specified nuisance parameter estimates, it is to no surprise that it is inconsistent in this case, so the ratio diverges.
 
 \begin{figure}[h!]
     \centering
@@ -294,18 +294,18 @@ Figure \ref{figSEpara} confirms the results we saw above, as we see the ratio of
     \label{fighistpara}
 \end{figure}
 
-Figure \ref{fighistpara} suggests that we indeed see asymptotic normality of the distribution, centered at the true mean, of the DR estimators that have at least one correctly specified nuisance parameter model.\\
+Figure \ref{fighistpara} suggests that we indeed see asymptotic normality of the distribution, centred at the true mean, of the DR estimators that have at least one correctly specified nuisance parameter model.\\
 
-These results suggest that the parametric approach for setting the nuisance parameter models is a good way of specifying these models, as shown by the low bias and high CI coverage of the estimates. An important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with, and their theoretical results have been proven in the literature. However we were only able to set the models correctly because we knew the distribution of the data-generative method, and therefore the fact that there was an interactive term between $W_1,W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been time-consuming to find the correct specification of at least one nuisance parameter model. In practice we would be likely to see results as seen from the DR estimator with both models misspecified, which has no advantage as we saw the CIs eventually didn't contain the true mean. This is where the practicality of ensemble learners from ML tools seem to be a more efficient way of setting these models, which we will cover in the next section.
+These results suggest that the parametric approach for setting the nuisance parameter models is a good way of specifying these models, as shown by the low bias and high CI coverage of the estimates. An important advantage of parametric DR estimation is the user-friendly aspect, as we have mentioned previously that logistic or linear regressions models are easy fitting methods to start with, and their theoretical results have been proven in the literature. However we were only able to set the models correctly because we knew the distribution of the data-generative method, and therefore the fact that there was an interactive term between $W_1, W_2$ in the logistic regression model. Had we been given this data set without any information on how it was generated, it would have been time-consuming to find the correct specification of at least one nuisance parameter model. In practice, we would be likely to see results as seen from the DR estimator with both models misspecified, which has no advantage as we saw the CIs eventually didn't contain the true mean. This is where the practicality of ensemble learners from ML tools seem to be a more efficient way of setting these models, which we will cover in the next section.
 
 \clearpage
 \section{ML approaches to optimise the DR estimator}
 
-Parametric models for the propensity score and outcome regression are backed by many theoretical results in the literature, and are relatively simple models to train thanks to their finite parameter space. However we have seen in the simulation study above that even a slight misspecification can lead to biased estimations that have CIs almost surely not containing the true mean. Hence the convenience of parametric models is over-weighed by defectiveness under model misspecification \citep{diaz}.
+Parametric models for the propensity score and outcome regression are backed by many theoretical results in the literature and are relatively simple models to train thanks to their finite parameter space. However, we have seen in the simulation study above that even a slight misspecification can lead to biased estimations that have CIs almost surely not containing the true mean. Hence the convenience of parametric models is over-weighed by defectiveness under model misspecification \citep{diaz}.
 
-Alternatively, one can use ML models to try to alleviate this bias and CI coverage, as they are often data-adaptive and therefore provide a certain degree of freedom to get a correctly specified model. In fact, \citet{ps_SL} have shown that when the propensity score is incorrectly specified, the use of ML tools for specifying the outcome model can still give an unbiased DR estimator, which is an advantage over the parametric scenario, as we had seen that an incorrect propensity score with correct outcome regression was still giving the worse DR estimator in terms of bias in section \ref{para_model}.
+Alternatively, one can use ML models to try to alleviate this bias and CI coverage, as they are often data-adaptive and therefore provide a certain degree of freedom to get a correctly specified model. \citet{ps_SL} have shown that when the propensity score is incorrectly specified, the use of ML tools for specifying the outcome model can still give an unbiased DR estimator, which is an advantage over the parametric scenario, as we had seen that an incorrect propensity score with correct outcome regression was still giving the worse DR estimator in terms of bias in section \ref{para_model}.
 
-Some data adaptive methods include: RFs, Support Vector Machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. These methods have been observed to have good empirical performance, but limited theoretical results exist for them. In the following sections we will take a closer look at the use of RFs and MLPs with various data settings, and see if these data-adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
+Some data-adaptive methods include RFs, Support Vector Machines, kernel regression, outcome weighed learning, Q-learning, neural networks, ensembles of these methods, etc. These methods have been observed to have good empirical performance, but limited theoretical results exist for them. In the following sections, we will take a closer look at the use of RFs and MLPs with various data settings, and see if these data-adaptive methods give better estimates compared to the results from parametric models, even accounting for higher model complexity by adding more covariates to the data.
 
 Note that in nonparametric inference, from \cite{benkeser2017}'s proof of the consistency of the DR estimator, the remainder term 
 \begin{align*}
@@ -315,12 +315,12 @@ of the linearisation of the bias of the DR estimator tends to zero at a rate det
 
 \subsection{Using RFs}
 
-RFs are a beginner friendly ML tool that create a classification or regression model based on multiple randomly generated decision trees that are combined together to make a better prediction than that of a single decision tree. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also capable of being trained on a dataset containing a mix of continuous and categorical features. However it is not the most time efficient tool, as the training of the models requires a non-negligible amount of computational power. In this section we will explore the use of RFs for fitting the nuisance parameter models in DR estimation.
+RFs are a beginner-friendly ML tool that create a classification or regression model based on multiple randomly generated decision trees that are combined to make a better prediction than that of a single decision tree. It is easy to use and fit thanks to pre-existing packages in Python and R, and they are also capable of being trained on a dataset containing a mix of continuous and categorical features. However, it is not the most time-efficient tool, as the training of the models requires a non-negligible amount of computational power. In this section, we will explore the use of RFs for fitting the nuisance parameter models in DR estimation.
 
 \begin{figure}
     \centering
     \includegraphics[width = 0.7\columnwidth]{figures/tree.png}
-    \caption{Illustration of a RF (source: analyticsvidhya.com)}
+    \caption{Illustration of an RF (source: analyticsvidhya.com)}
     \label{fig:my_label}
 \end{figure}
 
@@ -330,8 +330,8 @@ RFs are a beginner friendly ML tool that create a classification or regression m
 
 We use the same data generated in section \ref{para_model}, and this time we calculate DR estimators with various nuisance parameter models that are logistic regressions or RFs:
 \begin{itemize}
-    \item \texttt{DR logistic ps, RF om}: the propensity score model is a correctly specified logistic regression, and the outcome model is a RF. Both model account for the interaction term between $W_1$ and $W_2$ in feature engineering.
-    \item \texttt{DR logistic om, RF ps}: the outcome model is a correctly specified logistic regression, and the propensity score is a RF.
+    \item \texttt{DR logistic ps, RF om}: the propensity score model is a correctly specified logistic regression, and the outcome model is an RF. Both models account for the interaction term between $W_1$ and $W_2$ in feature engineering.
+    \item \texttt{DR logistic om, RF ps}: the outcome model is a correctly specified logistic regression, and the propensity score is an RF.
     \item \texttt{DR RF}: both the propensity score model and the outcome model are RFs that account for the interaction term between $W_1$ and $W_2$ in feature engineering.
     \item \texttt{DR mis. logistic om, RF ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score model is a correctly specified RF.
     \item \texttt{DR mis. logistic ps, RF om}: the propensity score model is an incorrectly specified logistic regression, and the outcome model is a correctly specified RF.
@@ -341,7 +341,7 @@ We use the same data generated in section \ref{para_model}, and this time we cal
     \item \texttt{DR exact}: both the propensity score model and outcome model are exactly specified by using the distributions from the data generative methods, added for comparison.
 \end{itemize}
 
-Each time a RF is specified, it goes through a stratified 5-fold cross validation of RF parameters in order to input the parameters that give a RF with the best accuracy on the test sets. A summary of the parameters tested by the cross-validation is provided in table \ref{tableRF}.\\
+Each time an RF is specified, it goes through a stratified 5-fold cross validation of RF parameters in order to input the parameters that give an RF with the best accuracy on the test sets. A summary of the parameters tested by the cross-validation is provided in table \ref{tableRF}.\\
 \begin{table}[]
     \centering
 \begin{tabular}{ |p{3cm}|p{3cm}|p{3cm}| }
@@ -376,13 +376,13 @@ As before, we obtain an empirical bias by taking the sample mean of 2500 generat
     \label{figsqrtnRF}
 \end{figure}
 
-We notice in figure \ref{figbiasRF} that the models with RF still provide DR estimates that have bias converging to 0, even when the propensity score model and outcome model are set using a RF that doesn't account for the interaction term. This suggests that the RF is able to recover the interaction, making it a useful tool in setting the nuisance parameter models. Based on the sample sizes considered, figure \ref{figsqrtnRF} also suggests that theses models have biases with rate of convergence to 0 faster than $N^{-1/2}$, which further illustrates the double robustness of the estimators.
+We notice in figure \ref{figbiasRF} that the models with RF still provide DR estimates that have bias converging to 0, even when the propensity score model and outcome model are set using an RF that doesn't account for the interaction term. This suggests that the RF can recover the interaction, making it a useful tool in setting the nuisance parameter models. Based on the sample sizes considered, figure \ref{figsqrtnRF} also suggests that these models have biases with a rate of convergence to 0 faster than that of $N^{-1/2}$, which further illustrates the double robustness of the estimators.
 
-We also notice that when the outcome model was a RF and the propensity score model was misspecified with a model that doesn't account for the interaction term, whether that was a logistic regression or a RF, the bias still performs well, which is in line with what \citet{ps_SL} have shown about the recovery of unbiasedness with ML tools for the outcome model when dealing with a misspecified propensity score model. 
+We also notice that when the outcome model was an RF and the propensity score model was misspecified with a model that doesn't account for the interaction term, whether that was a logistic regression or an RF, the bias still performs well, which is in line with what \citet{ps_SL} have shown about the recovery of unbiasedness with ML tools for the outcome model when dealing with a misspecified propensity score model. 
 
-However these figures show an unusual result for the model that had a misspecified logistic outcome model, paired with a RF propensity score model. As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggest its rate of convergence to 0 is slower than $N^{-1/2}$, whereas when the misspecification of the outcome model is through a RF, the bias still performs well (its brown line on the graph is overlapped with the grey line). It is possible that the divergence of the misspecified logistic outcome model from the true outcome model overpowers the convergence of the RF to the true propensity score, so the \cite{benkeser2017} remainder term $R$ has slow convergence rate, and hence so does the bias of this estimator.
+However, these figures show an unusual result for the model that had a misspecified logistic outcome model, paired with an RF propensity score model. As we can see in figure \ref{figsqrtnRF}, the bias of this estimate does not converge fast enough, as the plot suggests its rate of convergence to 0 is slower than $N^{-1/2}$, whereas when the misspecification of the outcome model is through an RF, the bias still performs well (its brown line on the graph is overlapped with the grey line). The divergence of the misspecified logistic outcome model from the true outcome model may overpower the convergence of the RF to the true propensity score, so the \cite{benkeser2017} remainder term $R$ has a slow convergence rate, and hence so does the bias of this estimator.
 
-As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converge to the estimated value of the SE at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the misspecified logistic outcome model and RF propensity, this CI coverage simply converges to 0 (with the SE estimate diverging from the standard deviation in \ref{figSERF}), so we eventually do not contain the true value of the sample mean in the CIs based on this specification of the DR estimator. Again, more exploration of DR estimations using a misspecified parametric outcome model and a RF propensity score model is needed to see why this phenomenon is happening.
+As for the CI coverage results of the various DR estimations in figure \ref{figCIRF}, we notice that their convergence is slower compared to the parametric setting in section \ref{para_model}, and perhaps getting results from larger sample sizes would have shown that they eventually reach the 95\% goal. Figure \ref{figSERF} shows that the standard deviation of the estimated means also converges to the estimated value of the SE at a slower rate than the parametric setting, hence explaining the slowness in CI coverage convergence as well. However for the DR estimator with the misspecified logistic outcome model and RF propensity, this CI coverage simply converges to 0 (with the SE estimate diverging from the standard deviation in \ref{figSERF}), so we eventually do not contain the true value of the sample mean in the CIs based on this specification of the DR estimator. Again, more exploration of DR estimations using a misspecified parametric outcome model and an RF propensity score model is needed to see why this phenomenon is happening.
 
 \begin{figure}[h!]
     \centering
@@ -393,7 +393,7 @@ As for the CI coverage results of the various DR estimations in figure \ref{figC
 
 Going back to the DR estimates that were only specified with RFs, figure \ref{fighistRF} suggest asymptotic normality of the distribution of these estimates, like in the parametric setting. \\
 
-Overall the use of RFs in this data setting has resulted in consistent DR estimates (with the exception of one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the RFs easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and did not account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that RFs can provide some degrees of freedom for correct model specification. However the estimates have high bias comapared to the parametric setting. Their CI coverage, and more precisely the \cite{lunceford_davidian} SE estimation could also be improved as we are getting worse SE estimate to mean sample deviation ratio than in the parametric setting. \cite{benkeser2017} have provided correction procedures to recover almost-nominal CI coverage in inference using nonparametric DR estimation.
+Overall the use of RFs in this data set has resulted in consistent DR estimates (except for one estimate mentioned before). Moreover, misspecification of the models by omitting the interaction term was an issue that the RFs easily overcame, as seen in the similar consistency and asymptotic normality results of the RF models that did and did not account for this interaction. This is a non-negligible upgrade from the parametric setting as it suggests that RFs can provide some degrees of freedom for correct model specification. However, the estimates have a high bias compared to the parametric setting. Their CI coverage, and more precisely the \cite{lunceford_davidian} SE estimation could also be improved as we are getting a worse SE estimate to mean sample deviation ratio than in the parametric setting. \cite{benkeser2017} have provided correction procedures to recover almost-nominal CI coverage in inference using nonparametric DR estimation.
 
 \begin{figure}[h!]
     \centering
@@ -410,7 +410,7 @@ Overall the use of RFs in this data setting has resulted in consistent DR estima
 \end{figure}
 
 \clearpage
-\subsubsection{RF simulation 2: 4 features}
+\subsubsection{RF simulation 2: 4 features} \label{RF simu 2}
 
 This time we increase the complexity of our DR estimation by adding two new features to the data-generative method from the previous section. We now have $\mathbf{W} = (W_1,W_2,W_3,W_4)$ where $W_1,W_2$ are as before, $W_3$ follows a standard normal distribution and $W_4$ follows an exponential distribution with mean 1. The features are mutually independent. The new true propensity score model is 
 \begin{align*}
@@ -422,12 +422,12 @@ and the new true outcome model is
     & = \expit(0.2 - w_1 + 2w_1w_2 - w_3 + 2w_3w_4)
 \end{align*}
 
-We ran simulations using the same combination of nuisance parameter model settings as in simulation 1 with 2 features, but this time when we refer to misspecified specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the RFs was also expanded so as to consider up to 4 features at a time in each split. 
+We ran simulations using the same combination of nuisance parameter model settings as in simulation 1 with 2 features, but this time when we refer to misspecified specification, it means the model didn't account for both interaction terms $W_1W_2$ and $W_3W_4$. The cross-validation for the RFs was also expanded to consider up to 4 features at a time in each split. 
 
 \subsubsection*{Results}
 
 \todo[inline]{missing sample size N = 1400}
-Unlike the simulation with 2 features, this time with the addition of 2 new features we obtained estimates that had poor convergence rates. Figure \ref{figbiasRF_moreW} already suggests higher bias in the estimators and a deceleration of the bias rate of convergence compared to the simulation with 2 features. This is further illustrated in figure \ref{figsqrtnRF_moreW} as the divergence of the bias elevated to $N^{1/2}$ suggest that the rate of convergence to 0 is slower than $N^{-1/2}$. The only estimator that performed well in this setting, based on the sample sizes considered, is the estimator with a correct logistic outcome model and a RF propensity score model that accounts for the interactions terms (orange line in the plots). 
+Unlike the simulation with 2 features, this time with the addition of 2 new features we obtained estimates that had poor convergence rates. Figure \ref{figbiasRF_moreW} already suggests higher bias in the estimators and deceleration of the bias rate of convergence compared to the simulation with 2 features. This is further illustrated in figure \ref{figsqrtnRF_moreW} as the divergence of the bias elevated to $N^{1/2}$ suggest that the rate of convergence to 0 is slower than $N^{-1/2}$. The only estimator that performed well in this setting, based on the sample sizes considered, is the estimator with a correct logistic outcome model and an RF propensity score model that accounts for the interactions terms (orange line in the plots). 
 
 \begin{figure}[h!]
     \centering
@@ -443,7 +443,7 @@ Unlike the simulation with 2 features, this time with the addition of 2 new feat
     \label{figsqrtnRF_moreW}
 \end{figure}
 
-Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figure \ref{figCIRF_moreW}, and in fact many of the estimators have a CI coverage converging to 0. This is further illustrated by the divergence of the SE estimate from the true deviation as seen in figure \ref{figSERF_moreW}. Even for the estimator that had a fast enough bias convergence (orange in plots), the convergence to a 95\% coverage of its CIs is relatively slow, and from sample size 1000 to 1200, there is a slight decrease in coverage. This might suggest a worsening of the CI coverage in larger samples.
+Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figure \ref{figCIRF_moreW}, and many of the estimators have a CI coverage converging to 0. This is further illustrated by the divergence of the SE estimate from the true deviation as seen in figure \ref{figSERF_moreW}. Even for the estimator that had a fast enough bias convergence (orange in plots), the convergence to a 95\% coverage of its CIs is relatively slow, and from sample size 1000 to 1200, there is a slight decrease in coverage. This might suggest a worsening of the CI coverage in larger samples.
 
 \begin{figure}[h!]
     \centering
@@ -459,7 +459,7 @@ Unsurprisingly, the convergence to 95\% CI coverage is also poor as seen in figu
     \label{figSERF_moreW}
 \end{figure}
 
-It is with no surprise that due to the slowness of the convergences, a normal distribution centered at the true mean hasn't been achieved for the largest sample size considered in the simulation, in particular for the DR estimators involving RFs only, as seen in figure \ref{fighistRF_moreW}. \\
+It is with no surprise that due to the slowness of the convergences, a normal distribution centred at the true mean hasn't been achieved for the largest sample size considered in the simulation, in particular for the DR estimators involving RFs only, as seen in figure \ref{fighistRF_moreW}. \\
 
 \begin{figure}[h!]
     \centering
@@ -468,7 +468,7 @@ It is with no surprise that due to the slowness of the convergences, a normal di
     \label{fighistRF_moreW}
 \end{figure}
 
-Overall, doubling the number of features has resulted in poor bias and slow convergence of the DR estimates to the true value of the mean. This may be an example of the so-called curse of dimensionality \citep{Wasserman2006}: by doubling the number of features, the complexity of training the RFs overcomes correct classification or regression, leading to the poor convergence of our DR estimates to the true value. Had the added features $W_3,W_4$ had a smaller range of values, we might have alleviated the complexity of the classification problem. Although we had found good results using RFs in the 2-features case, one must take into account the complexity of the dataset and classification/regression problem before choosing to use a RF to set the nuisance parameter models of a DR estimator.
+Overall, doubling the number of features has resulted in poor bias and slow convergence of the DR estimates to the true value of the mean. This may be an example of the so-called curse of dimensionality \citep{Wasserman2006}: by doubling the number of features, the complexity of training the RFs overcomes correct classification or regression, leading to the poor convergence of our DR estimates to the true value. Had the added features $W_3, W_4$ had a smaller range of values, we might have alleviated the complexity of the classification problem. Although we had found good results using RFs in the 2-features case, one must take into account the complexity of the dataset and classification/regression problem before choosing to use an RF to set the nuisance parameter models of a DR estimator.
 
 \clearpage
 \subsection{Using MLPs}
@@ -479,18 +479,18 @@ Overall, doubling the number of features has resulted in poor bias and slow conv
     \label{fignn}
 \end{figure}
 
-This section is motivated by the publication by \citet{setoguchi-nn} suggesting that neural networks reduce the bias of propensity score models compared to logistic regression, and hence should also alleviate the bias of the DR estimator. This time we are using MLPs, a type of forward-feeding artificial neural network. As mentioned by \citet{hastieESL}, there is a lot of popularity surrounding neural networks lately, and like RFs, they are easy to implement in Python thanks to the scikit-learn module. The training time of a MLP is also faster than that of a RF for models with a small number of features. 
+This section is motivated by the publication by \citet{setoguchi-nn} suggesting that neural networks reduce the bias of propensity score models compared to logistic regression, and hence should also alleviate the bias of the DR estimator. This time we are using MLPs, a type of forward-feeding artificial neural network. As mentioned by \citet{hastieESL}, there is a lot of popularity surrounding neural networks lately, and like RFs, they are easy to implement in Python thanks to the scikit-learn module. The training time of an MLP is also faster than that of an RF for models with a small number of features. 
 
 In a classification problem, there are $K$ output nodes at the end of the network diagram corresponding to the $K$ categories the output $Y$ can be in. The first layer of nodes in the diagram corresponds to the $p$ input features. Then, each node in the hidden layers of the network is created as a linear combination of the previous layer's nodes. At the end of the network, the output nodes are created as functions of linear combinations of the last hidden layer's nodes. An illustration of the network diagram of a single layer perceptron is provided in figure \ref{fignn}, taken from \textit{The Elements of Statistical Learning} by \citet{hastieESL}.
 
-In the following sections we will evaluate the use of MLPs for DR estimation, through simulations on the data setting we have encountered in the previous sections.
+In the following sections, we will evaluate the use of MLPs for DR estimation, through simulations on the data sets we have encountered in the previous sections.
 
-\subsubsection{MLP simulation 1: 2 features}
+\subsubsection{MLP simulation 1: 2 features} \label{MLP simu 1}
 
-We go back to the data structure that had 2 features $W_1,W_2$, and we wish to see what happens to the consistency of the DR estimates when we use MLPs for the propensity score model or outcome model. The various DR estimates based on MLP nuisance parameter models are as follows: 
+We go back to the data structure that had 2 features $W_1, W_2$, and we wish to see what happens to the consistency of the DR estimates when we use MLPs for the propensity score model or outcome model. The various DR estimates based on MLP nuisance parameter models are as follows: 
 \begin{itemize}
-    \item \texttt{DR logistic ps, MLP om}: the propensity score model is a correctly specified logistic regression, and the outcome model is a MLP. Both model account for the interaction term between $W_1$ and $W_2$
-    \item \texttt{DR logistic om, MLP ps}: the outcome model is a correctly specified logistic regression, and the propensity score model is a MLP.
+    \item \texttt{DR logistic ps, MLP om}: the propensity score model is a correctly specified logistic regression, and the outcome model is an MLP. Both model account for the interaction term between $W_1$ and $W_2$
+    \item \texttt{DR logistic om, MLP ps}: the outcome model is a correctly specified logistic regression, and the propensity score model is an MLP.
     \item \texttt{DR MLP}: both the propensity score model and the outcome model are MLPs that account for the interaction term between $W_1$ and $W_2$.
     \item \texttt{DR mis. logistic om, MLP ps}: the outcome model is an incorrectly specified logistic regression, and the propensity score model is a correctly specified MLP.
     \item \texttt{DR mis. logistic ps, MLP om}: the propensity score model is an incorrectly specified logistic regression, and the outcome model is a correctly specified MLP.
@@ -533,7 +533,7 @@ Like with RFs, the MLPs also go through a 5-fold cross-validation process to tun
     \label{figsqrtnMLP}
 \end{figure}
 
-In figure \ref{figbiasMLP} we notice that most estimates involving at least one MLP nuisance parameter models have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with lowest bias is the one that had a logistic outcome regression and a MLP propensity score model, and it outperforms the estimate with logistic propensity score model. This goes in line with the findings of \citet{setoguchi-nn} about a MLP propensity score model having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameter models performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with misspecified logistic outcome model and MLP propensity score model (red line in plot) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with misspecified logistic outcome model and MLP propensity score model shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with misspecified logistic propensity score model and MLP outcome model, \texttt{DR mis. logistic ps, MLP om} (purple line on the plots) has one of highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with misspecified MLP propensity score modeland MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
+In figure \ref{figbiasMLP} we notice that most estimates involving at least one MLP nuisance parameter models have a bias seeming to converge towards zero. Excluding the DR estimate with exact specification, the estimate with the lowest bias is the one that had a logistic outcome regression and an MLP propensity score model, and it outperforms the estimate with the logistic propensity score model. This goes in line with the findings of \citet{setoguchi-nn} about an MLP propensity score model having lower bias than with logistic regression. The DR estimate set with correct MLPs for both nuisance parameter models performs well in terms of bias as well, although the convergence to 0 bias plateaus as sample sizes get larger. The DR estimate with misspecified logistic outcome model and MLP propensity score model (red plotline) has a U-shaped bias curve, suggesting a worsening bias in larger samples. Looking at figure \ref{figsqrtnMLP}, the bias convergence to 0 for these estimates seem to be faster than that of $N^{-1/2}$ for most estimates as shown by the downward trend of the $\sqrt{N}$bias curves, while the estimate with misspecified logistic outcome model and MLP propensity score model shows sign of diverging, in line with what we saw in figure \ref{figbiasMLP}. The DR estimator with misspecified logistic propensity score model and MLP outcome model, \texttt{DR mis. logistic ps, MLP om} (purple line on the plots) has one of the highest bias among these estimators, but the convergence of the bias at a higher speed than $N^{-1/2}$ suggests that the incorrect specification was overcome by the MLPs and so the estimate is still consistent, even though it will converge towards the true mean at a slower pace than the estimates with at least one correct MLP specification. Another notable estimate is the one with a misspecified MLP propensity score model and MLP outcome model (pink line in plots). Even though this estimate starts at high bias, the latter is seeming to quickly converge to 0.
 
 \begin{figure}[h!]
     \centering
@@ -542,7 +542,7 @@ In figure \ref{figbiasMLP} we notice that most estimates involving at least one 
     \label{figCIMLP}
 \end{figure}
 
-The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR mis. MLP om, MLP ps} and \texttt{DR mis. MLP ps \& om} (in blue, orange pink and grey) have CI coverage tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest to be tending towards the true value. On the other hand, we see a upside down U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR mis. MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score model is actually providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR mis. logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
+The CI coverage plot in figure \ref{figCIMLP} also shows interesting results. \texttt{DR logistic om, MLP ps}, \texttt{DR logistic ps, MLP om}, \texttt{DR mis. MLP om, MLP ps} and \texttt{DR mis. MLP ps \& om} (in blue, orange pink and grey) have CI coverage tending to the 95\% goal, with the estimates with higher bias generally tending to 95\% coverage at a slower rate. Their SE estimates, as seen \ref{figSEMLP}, also suggest being tending towards the true value. On the other hand, we see an upside-down U-shape from the CI coverage and SE estimate curves of \texttt{DR MLP, DR logistic om, MLP ps, DR mis. MLP om, MLP ps} (in green, red and brown), suggesting a worsening CI coverage for larger sample sizes. These plots seem to suggest that a misspecification of the MLP for the propensity score model is providing a better CI coverage convergence of the DR estimates. The DR estimate struggling to get up to high CI coverage the most here is again \texttt{DR mis. logistic ps, MLP om}. We see from figure \ref{figSEMLP} that non-surprisingly, its SE estimate is converging to the true standard deviation at a slow pace as well, given the considered sample sizes. 
 
 \begin{figure}[h!]
     \centering
@@ -551,7 +551,7 @@ The CI coverage plot in figure \ref{figCIMLP} also show interesting results. \te
     \label{figSEMLP}
 \end{figure}
 
-Taking a particular look at the histograms of the DR estimates involving only MLPs for the largest sample size considered, we notice that although \texttt{DR MLP} and \texttt{DR mis. MLP om, MLP ps} have distributions almost centered at the true mean, we know from the diverging trend of their CI coverage at larger samples that these histogram will be less and less centered at the true mean as we increase sample size, so we wouldn't expect asymptotic normality from these. On the other hand, from the way the bias and CI coverage of \texttt{DR mis. MLP ps \& om} and \texttt{DR mis. MLP ps, MLP om} were converging, we are likely to get asymptotic normal distribution from these estimates, although at a slower rate than the parametric setting. Since \texttt{DR mis. MLP ps \& om} had higher bias, its histogram in figure \ref{fighistMLP} is less centered at the true value than that of \texttt{DR mis. MLP ps, MLP om} at the given sample size. It is likely that the more centered estimator has one or both nuisance parameter models converging faster to the true nuisance parameters than that of the less centered estimator's, making the remainder term in \cite{benkeser2017}'s bias linearisation converge faster to 0.
+Taking a particular look at the histograms of the DR estimates involving only MLPs for the largest sample size considered, we notice that although \texttt{DR MLP} and \texttt{DR mis. MLP om, MLP ps} have distributions almost centred at the true mean, we know from the diverging trend of their CI coverage at larger samples that these histograms will be less and less centred at the true mean as we increase sample size, so we wouldn't expect asymptotic normality from these. On the other hand, from the way the bias and CI coverage of \texttt{DR mis. MLP ps \& om} and \texttt{DR mis. MLP ps, MLP om} were converging, we are likely to get an asymptotic normal distribution from these estimates, although at a slower rate than the parametric setting. Since \texttt{DR mis. MLP ps \& om} had higher bias, its histogram in figure \ref{fighistMLP} is less centered at the true value than that of \texttt{DR mis. MLP ps, MLP om} at the given sample size. The more centred estimator likely has one or both nuisance parameter models converging faster to the true nuisance parameters than that of the less centred estimator's, making the remainder term in \cite{benkeser2017}'s bias linearisation converge faster to 0.
 
 \begin{figure}[h!]
     \centering
@@ -563,103 +563,128 @@ Taking a particular look at the histograms of the DR estimates involving only ML
 \clearpage
 \subsubsection{MLP simulation 2: 4 features}
 
-\todo[inline]{to be added once results come back}
+Like in the second RF simulation from section \ref{RF simu 2}, we now wish to illustrate the efficacy of MLPs in the DR estimations from section \ref{MLP simu 1}, with two features $W_3, W_4$ added to the previous simulation's data. The distributions of $W_1,..., W_4$ haven't changed from section \ref{RF simu 2}. We also maintain the same cross-validation grid from the first MLP simulation in section \ref{MLP simu 1}. As in section \ref{RF simu 2}, when we refer to a misspecified nuisance parameter model, we mean that both the interactions between $W_1, W_2$ and $W_3, W_4$ are not accounted for in the feature engineering of the model.
+
+\textit{The author apologises for the lack of data points at sample sizes $N = 600, 800$, as they ran into computational issues for these particular sample sizes that could not be fixed in time.}
+
+\subsubsection*{Results}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biasMLP_moreW.png}
-    \caption{MLP simulation 1 results of bias for the various DR estimator specifications}
+    \caption{MLP simulation 2 results of bias for the various DR estimator specifications}
     \label{figbiasMLP_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtnMLP_moreW.png}
-    \caption{MLP simulation 1 results of $\sqrt{N}$bias for the various DR estimator specifications}
+    \caption{MLP simulation 2 results of $\sqrt{N}$bias for the various DR estimator specifications}
     \label{figsqrtnMLP_moreW}
 \end{figure}
+
+With the added complexity from having 4 features, the DR estimates involving MLPs are still showing downward trends in their bias as seen in figure \ref{figbiasMLP_moreW}, although the biases are higher and tend to 0 at a slower rate than the 2-feature case from the previous simulation. Note in figure \ref{figsqrtnMLP_moreW} that the DR estimates have downward-trending $\sqrt{N}$bias curves, suggesting that the rate of convergence of their bias is at least as fast as that of $N^{-1/2}$. The only exception is the DR estimate that had misspecified MLPs for both nuisance parameter models (in grey on the plot), for which we have an upward $\sqrt{N}$bias trend, which suggests that its bias has a convergence rate slower than that of $N^{-1/2}$.
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIMLP_moreW.png}
-    \caption{MLP simulation 1 results of 95\% CIs coverage for the various DR estimator specifications}
+    \caption{MLP simulation 2 results of 95\% CIs coverage for the various DR estimator specifications}
     \label{figCIMLP_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/SEMLP_moreW.png}
-    \caption{MLP simulation 1's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
+    \caption{MLP simulation 2's accuracy of \citet{lunceford_davidian} SE estimation for the various DR estimator specifications}
     \label{figSEMLP_moreW}
 \end{figure}
+
+As for CI coverage performance, figure \ref{figCIMLP_moreW} suggests that the DR estimator with both MLP nuisance parameter models that account for the feature interaction (in green on the plot) has low CI coverage, but this coverage is converging to the nominal 95\% value at a relatively fast rate. The ratio of its mean SE estimate to the sample standard deviation is also tending towards 1, as seen in figure \ref{figSEMLP_moreW}. The DR estimates with exact or correct logistic models are reaching high coverage as expected because at least one of the models is correctly specified. For the rest of the estimators involving MLPs (in brown, pink, red, purple), their CI coverage is substantially lower, but again we see an upward trend of this coverage, although at a slower rate. Their SE estimate to standard deviation ratio tending to 1 at a slow rate, as seen in figure \ref{figSEMLP_moreW}, go in line with this slow upward trend in their CI coverage. Unsurprisingly, the DR estimate with misspecified MLP nuisance parameter models has very poor CI coverage as its SE estimate to standard deviation ratio is not converging to 1. Unlike in the 2-feature case, this time misspecification of the interaction terms in both MLP nuisance parameter models resulted in poor CI coverage. This is likely because not accounting for 2 interaction terms in the model specification in the 4-feature case was more penalising to the MLPs' ability to recover them, than not accounting for just 1 in the 2-feature case.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/histMLP_moreW.png}
-    \caption{MLP simulation 1's histograms of DR estimates for sample size $N = 1200$}
+    \caption{MLP simulation 2's histograms of DR estimates for sample size $N = 1200$}
     \label{fighistMLP_moreW}
 \end{figure}
 
+Due to its lower bias, \texttt{DR MLP} has the most centred histogram at a high sample size compared to the other 3 DR estimates involving only MLPs, as seen in figure \ref{fighistMLP_moreW}. \texttt{DR mis. MLP ps & om}, having the highest bias, has a histogram of values that is heavily skewed to the right. It is also the case for the DR estimates with one misspecified MLP, but we expect these to become more centred at the true mean as we increase the sample size.
+
+Overall, the complexity from having doubled the number of features relatively did not penalise MLPs too much in terms of their convergence to the true nuisance parameters, which has led to DR estimates that, although having higher bias and lower CI coverage, still show signs of converging to the true mean at a slower rate than the 2 feature case.
 \clearpage
 \subsection{Discussion}
-\todo[inline]{missing sample size N = 1200, 1400}
+\todo[inline]{missing sample size N = 1200}
+
+\subsubsection{2-feature case} \label{2 features}
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biascompare.png}
-    \caption{Comparing bias performance on simulation with 2 features}
-    \label{fig:my_label}
+    \caption{Comparing bias performance on simulations with 2 features}
+    \label{biascompare}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtncompare.png}
-    \caption{Caption}
-    \label{fig:my_label}
+    \caption{Comparing $\sqrt{N}$bias performance on simulations with 2 features}
+    \label{sqrtncompare}
 \end{figure}
+
+Figure \ref{biascompare} and \ref{sqrtncompare} suggests that in the 2-feature case, DR estimates involving RFs had lower bias than the DR estimates involving MLPs, but these biases converge to 0 at a slower rate than the biases of the MLP-based DR estimates. Note that with both ML tools, not accounting for the interaction term $W_1W_2$ in both nuisance parameter models has resulted in higher bias in the DR estimation, compared to when at least one of the nuisance parameter ML models accounted for the interaction term. If the user has no information on the distribution of the outcome and the propensity score, and is uncertain of whether an interaction exists, they could account for this interaction term in one of the two ML nuisance parameter models to ensure at least one of the ML models is correctly specified. In the parametric approach, the user needed to get both the parametric distribution assumption and the interaction term correctly specified; in the nonparametric approach with RFs and MLPs, the user only needs to get the interaction term correctly specified, hence reducing the chance of misspecification compared to the parametric method.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIcompare.png}
     \caption{Caption}
-    \label{fig:my_label}
+    \label{CIcompare}
 \end{figure}
+ 
+As for CIs constructed from these estimators, the DR estimators with RFs start at a higher CI coverage value but fail to converge fast enough to the 95\% coverage goal value as seen in figure \ref{CIcompare}. However, the DR estimators with MLPs start at low CI coverage but converge to the nominal value at a faster rate.
+
+To summarise, when choosing between RFs and MLPs for nuisance parameter model setting for this specific data set, if one seeks to have DR estimations with lower bias, one should prioritise RFs; if one wishes to construct CIs with high coverage, especially with large sample sizes, one should turn towards using MLPs in their DR estimation.
+
+\subsubsection{4-feature case} \label{4 features}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/biascompare_moreW.png}
     \caption{Comparing bias performance on simulation with 2 features}
-    \label{fig:my_label}
+    \label{biascompare_moreW}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/sqrtncompare_moreW.png}
     \caption{Caption}
-    \label{fig:my_label}
+    \label{sqrtncompare_moreW}
 \end{figure}
+
+We had shown in the previous sections that RFs struggled to converge rapidly enough to the true nuisance parameters with the addition of two new features compared to MLPs. We can see this difference in convergence in figures \ref{biascompare_moreW} and \ref{sqrtncompare_moreW}. DR estimators with RFs have high bias with a rate of convergence slower than that of $N^{-1/2}$. The DR estimators involving MLPs have high bias that are converging to 0 at a rate faster than that of $N^{-1/2}$, with the exception of the DR estimator with misspecified MLP nuisance parameter models.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width = 0.9\columnwidth]{figures/CIcompare_moreW.png}
     \caption{Caption}
-    \label{fig:my_label}
+    \label{CIcompare_moreW}
 \end{figure}
 
-\todo[inline]{waiting for more results}
+As for CI coverage performance, we can clearly see in figure \ref{CIcompare_moreW} that the DR estimators with RFs fail to reach nominal CI coverage, and the latter are even seeming to converge to 0\%. DR estimators involving at least one correct MLP specification, on the other hand, have CI coverage slowly converging to the 95\% goal.
 
-- RF gives lower bias but convergence rate is slow compared to MLP 
+To summarise, in the 4-feature case, nuisance parameter models based on RFs had slower convergence rate to the true nuisance parameters compared to MLPs, which resulted DR estimates with higher bias and poor to nonexistent CI coverage. Models based on MLPs were however not as penalised by the addition of features and provided $\sqrt{N}$-consistent DR estimates with high but converging bias and CIs converging to the nominal coverage, although at a slow rate.
 
-- RF: with/without interaction terms not an issue, MLP: without interaction for ps gives better convergence rates 
+\subsubsection{Limitations}
 
-- why is bias diverging after some sample size for some MLPs?
+The main limitation of this study on the use of ML tools in DR estimation is its non-exhaustiveness. Due to time and computational restrictions, we have only looked at 2 data scenarios (2 features vs 4 features defined in previous sections) and two different tools -- RFs and MLPs. With more time and computational power, we would hope that a more exhaustive study of ML tools for DR estimation could be made using different models and data sets. The results we have discussed in sections \ref{2 features} and \ref{4 features} and the comparisons we have made between in RFs and MLPs are not to be taken as generalities. As the name 'data-adaptive' suggests, the power of ML tools comes from being able to adapt to different classification or regression problems on a case by case basis. An ML tool's effectiveness is dependent on the quality of its training data and the tuning of its learning hyperparameters. In theory, we expect these models' predictions to converge to the true values, but in practice we cannot make general statements on their effectiveness. However, these ML approaches have proven to be efficient at setting nuisance parameter models that converge -- although slowly -- to the true nuisance parameters, when the alternative is a parametric approach that would have likely resulted in misspecification of these models in practice. 
 
-- there might be issues of overfitting here since we train and test on 80\% data but fit on 100\%
+Additionally, throughout the simulations, for each sample size, the ML models were first trained on 64\% of the full data, tested on 16\% of the data and fitted on the whole data. Hence due to the relatively small proportion of the full data set used for training these models, we might have encountered some under-fitting, which would affect model convergence rates.
 
-- complexity of the data set has a lot of influence on these performances; continuous features = infinite input categories -> difficult to train classification model 
-
-- more simulations on various data settings would be need to make more general remakrs on ML tools
-
-- but ML tools = data adaptive so in real world scenario one would likely test a few tools and pick the one that give best ps / om fit on new data 
+Another limitation to note is the range of hyperparameters we have chosen for cross-validations of RFs and MLPs. One would hope to cross-validate on a large range of hyperparameters to finely tune ML tools, but again we were limited by computational power and time. By restricting the cross-validation range we are reducing the chance of picking the hyperparameters that provide the best learning -- and hence convergence -- rate for these models. Our results suggest that in many cases, CIs based on the \cite{lunceford_davidian} SE estimate may not be valid using popular 'off the shelf' implementations of RFs and MLPs, such as small-range cross-validation. Greater care is required in how we tune ML tools to obtain fast learning and convergence rates.
 
 \section{Conclusion}
+
+We hope that this report has provided an insight into the potential of ML tools when used in conjunction with DR estimation. As we have seen throughout the simulations, when the alternative is a parametric approach for setting the nuisance parameter models that are likely to be misspecified in practice, RFs and MLPs provided higher degrees of freedom for getting a correct specification of these models. We have shown some promising results in terms of DR estimator bias convergence rates when using these ML tools. In the simulations we have considered, RFs performed better in terms of DR estimator bias than MLPs, while the latter performed better than the former in a data set with higher dimensions. However, while it is theoretically possible to use ML methods for DR estimation, greater care and research needs to be conducted on which ML tool to choose and how we tune its hyperparameters, to achieve high rates of convergence. Some selection algorithms such as Super Learners and stratified cross-validation exist for model and hyperparameter selection, but we have also shown that CI construction based on the \cite{lunceford_davidian} SE estimation often fail to reach nominal coverage when RFs and MLPs were tuned using simple cross-validation methods. \cite{benkeser2017} have proposed correction methods for recovering nominal CI coverage in nonparametric DR estimation. A more general study on larger sample sizes and different model tuning methods need to be conducted to fully understand the power and potential of ML tools in DR estimation. Although much more time consuming to train than parametric models, if we can streamline model and hyperparameter tuning to achieve higher convergence rates, these ML methods for DR estimation could be the key to further improving the performance and robustness of DR estimators.
+
 
 %% bibliography
 \clearpage
