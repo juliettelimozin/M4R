@@ -357,7 +357,7 @@ We use the same data generated in section \ref{para_model}, and this time we cal
 
 Each time an RF is specified, it goes through stratified 5-fold cross-validation of RF parameters to input the parameters that give an RF with the best accuracy on the test sets. A summary of the parameters tested by the cross-validation is provided in table \ref{tableRF}. The parameters we cross-validate are the main learning hyperparameters of an RF: the number of decision trees composing the RF, each tree's maximum depth (i.e the maximum number of nodes a decision tree has), and the number of features considered at each branch split in a tree. \\
 \begin{table}[]
-    \ centering
+    \centering
 \begin{tabular}{ |p{3cm}|p{3cm}|p{3cm}| }
  \hline
  \multicolumn{3}{|c|}{RF Cross-validation: Parameter Grid} \\
@@ -578,8 +578,6 @@ Taking a particular look at the histograms of the DR estimates involving only ML
 \subsubsection{MLP simulation 2: 4 features}
 
 Like in the second RF simulation from section \ref{RF simu 2}, we now wish to illustrate the efficacy of MLPs in the DR estimations from section \ref{MLP simu 1}, with two features $W_3, W_4$ added to the previous simulation's data. The distributions of $W_1,..., W_4$ haven't changed from section \ref{RF simu 2}. We also maintain the same cross-validation grid from the first MLP simulation in section \ref{MLP simu 1}. As in section \ref{RF simu 2}, when we refer to a misspecified nuisance parameter model, we mean that both the interactions between $W_1, W_2$ and $W_3, W_4$ are not accounted for in the feature engineering of the model.
-
-\textit{The author apologises for the lack of data points at sample sizes $N = 800, 1200$, as they ran into computational issues for these particular sample sizes that could not be fixed in time.}
 
 \subsubsection*{Results}
 
